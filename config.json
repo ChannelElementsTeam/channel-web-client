@@ -1,0 +1,24 @@
+{
+  "domain": "channel-elements.net",
+  "serverId": "DEV",
+  "baseClientUri": "http://localhost:31112",
+  "mongo": {
+    "mongoUrl": "mongodb://localhost:27017/channel-client",
+    "options": {},
+    "serverOptions": {
+      "socketOptions": {
+        "socketTimeoutMS": 300000,
+        "connectTimeoutMS": 300000
+      }
+    }
+  },
+  "ssl": {
+    "ca": "/usr/local/etc/certs/caBundle",
+    "key": "/usr/local/etc/certs/server.key",
+    "cert": "/usr/local/etc/certs/server.crt"
+  },
+  "client": {
+    "ssl": false,
+    "port": 31112
+  }
+}
