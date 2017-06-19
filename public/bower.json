@@ -4,10 +4,14 @@
   "main": "index.html",
   "dependencies": {
     "polymer": "Polymer/polymer#^2.0.0",
-    "channels-web-client-lib": "ChannelElementsTeam/channels-web-client-lib"
+    "channels-web-client-lib": "ChannelElementsTeam/channels-web-client-lib",
+    "iron-flex-layout": "^2.0.0",
+    "iron-icon": "^2.0.0",
+    "iron-iconset-svg": "^2.0.0"
   },
   "devDependencies": {
     "web-component-tester": "Polymer/web-component-tester#^6.0.0",
-    "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0"
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0",
+    "iron-icons": "^2.0.1"
   }
 }

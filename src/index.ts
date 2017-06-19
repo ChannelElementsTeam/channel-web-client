@@ -13,8 +13,10 @@ import * as url from 'url';
 import { configuration } from "./configuration";
 import { db } from './db';
 import { ChannelWebClientServer, ChannelsRequest } from './channel-web-client-server';
-
 import { ChannelServerResponse } from "./common/channel-server-messages";
+import { RestServer } from './interfaces/rest-server';
+import { UrlManager } from './url-manager';
+import { rootPageHandler } from './page-handlers/root-handler';
 
 const VERSION = 1;
 const DYNAMIC_BASE = '/d';
@@ -26,6 +28,12 @@ class ChannelElementsWebClient {
   private started: number;
   private channelWebClientServer: ChannelWebClientServer;
   private shadowPublicDirectory: string;
+  private restServers: RestServer[] = [rootPageHandler];
+  private urlManager: UrlManager;
+
+  constructor() {
+    this.urlManager = new UrlManager(VERSION);
+  }
 
   async start(): Promise<void> {
     this.setupExceptionHandling();
@@ -87,6 +95,11 @@ class ChannelElementsWebClient {
         next();
       });
     });
+
+    for (const restServer of this.restServers) {
+      await restServer.initializeRestServices(this.urlManager, this.app);
+    }
+
     this.app.use('/v' + VERSION, express.static(path.join(__dirname, '../public'), { maxAge: 1000 * 60 * 60 * 24 * 30 }));
     this.app.use('/v' + VERSION, express.static(this.shadowPublicDirectory, { maxAge: 1000 * 60 * 60 * 24 * 30 }));
     this.app.use('/s', express.static(path.join(__dirname, "../static"), { maxAge: 1000 * 60 * 60 * 24 * 30 }));
