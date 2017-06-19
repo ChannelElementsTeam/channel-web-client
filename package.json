@@ -18,7 +18,9 @@
   "homepage": "https://github.com/ChannelElementsTeam/channel-web-client#readme",
   "dependencies": {
     "@types/text-encoding": "0.0.30",
+    "@types/uuid": "^3.0.0",
     "body-parser": "^1.17.2",
+    "bower": "^1.8.0",
     "compression": "^1.6.2",
     "cookie-parser": "^1.4.3",
     "express": "^4.15.3",
@@ -26,7 +28,8 @@
     "express-ws": "^3.0.0",
     "mongodb": "^2.2.27",
     "signal-exit": "^3.0.2",
-    "text-encoding": "^0.6.4"
+    "text-encoding": "^0.6.4",
+    "uuid": "^3.1.0"
   },
   "devDependencies": {
     "@types/mongodb": "^2.2.2",

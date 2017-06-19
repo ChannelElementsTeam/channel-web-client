@@ -20,5 +20,6 @@
   "client": {
     "ssl": false,
     "port": 31112
-  }
+  },
+  "components": {}
 }

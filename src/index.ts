@@ -12,7 +12,7 @@ import * as url from 'url';
 
 import { configuration } from "./configuration";
 import { db } from './db';
-import { ChannelWebClientServer } from './channel-web-client-server';
+import { ChannelWebClientServer, ChannelsRequest } from './channel-web-client-server';
 
 import { ChannelServerResponse } from "./common/channel-server-messages";
 
@@ -25,13 +25,15 @@ class ChannelElementsWebClient {
   private expressWs: any;
   private started: number;
   private channelWebClientServer: ChannelWebClientServer;
+  private shadowPublicDirectory: string;
 
   async start(): Promise<void> {
     this.setupExceptionHandling();
     await this.setupConfiguration();
     await db.initialize();
+    this.shadowPublicDirectory = configuration.get('components.path', path.join(__dirname, '../shadow-public'));
     await this.setupExpress();
-    this.channelWebClientServer = new ChannelWebClientServer(this.app, this.server, configuration.get('baseClientUri'), DYNAMIC_BASE);
+    this.channelWebClientServer = new ChannelWebClientServer(this.app, this.server, configuration.get('baseClientUri'), DYNAMIC_BASE, this.shadowPublicDirectory, '/v' + VERSION);
     await this.channelWebClientServer.start();
     await this.setupServerPing();
     this.started = Date.now();
@@ -81,20 +83,13 @@ class ChannelElementsWebClient {
     this.app.use(cookieParser());
 
     this.app.use((req: Request, res: Response, next: NextFunction) => {
-      res.setHeader("Access-Control-Allow-Origin", "*");
-      res.setHeader("Access-Control-Allow-Credentials", "true");
-      if (req.method.toLowerCase() === "options") {
-        res.setHeader("Access-Control-Allow-Methods", "POST, GET, DELETE, OPTIONS");
-        const requestedHeaders = req.header("Access-Control-Request-Headers");
-        if (requestedHeaders) {
-          res.setHeader("Access-Control-Allow-Headers", requestedHeaders);
-        }
-      }
-      next();
+      this.channelWebClientServer.initializeRequest(req as ChannelsRequest, res).then(() => {
+        next();
+      });
     });
-
-    this.app.use('/v' + VERSION, express.static(path.join(__dirname, '../public'), { maxAge: 1000 * 60 * 60 * 24 * 7 }));
-    this.app.use('/s', express.static(path.join(__dirname, "../static"), { maxAge: 1000 * 60 * 60 * 24 * 7 }));
+    this.app.use('/v' + VERSION, express.static(path.join(__dirname, '../public'), { maxAge: 1000 * 60 * 60 * 24 * 30 }));
+    this.app.use('/v' + VERSION, express.static(this.shadowPublicDirectory, { maxAge: 1000 * 60 * 60 * 24 * 30 }));
+    this.app.use('/s', express.static(path.join(__dirname, "../static"), { maxAge: 1000 * 60 * 60 * 24 * 30 }));
     if (configuration.get('client.ssl')) {
       const privateKey = fs.readFileSync(configuration.get('ssl.key'), 'utf8');
       const certificate = fs.readFileSync(configuration.get('ssl.cert'), 'utf8');

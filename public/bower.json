@@ -1,0 +1,21 @@
+{
+  "name": "channels-web-client",
+  "homepage": "https://github.com/ChannelElementsTeam/channel-web-client",
+  "authors": [
+    "Kingston Duffie <kduffie@hivepoint.com>"
+  ],
+  "description": "The server for hosting a web-based ChannelElements-compatible client",
+  "main": "index.html",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "^2.0.1"
+  }
+}
