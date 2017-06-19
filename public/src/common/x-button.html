@@ -1,0 +1,48 @@
+<dom-module id="x-button">
+  <template>
+    <style>
+       :host {
+        display: inline-block;
+        font-family: "Roboto", sans-serif;
+        text-transform: uppercase;
+        padding: 8px 12px;
+        font-size: 16px;
+        background: #009688;
+        color: #fff;
+        cursor: pointer;
+        border-radius: 3px;
+        transition: all 0.2s ease;
+      }
+
+       :host(:hover) {
+        box-shadow: 0 4px 5px -1px rgba(0, 0, 0, 0.4);
+      }
+    </style>
+    <div>
+      <slot></slot>
+    </div>
+  </template>
+  <script>
+    class XButton extends Polymer.Element {
+      static get is() { return 'x-button'; }
+      static get properties() {
+        return {
+          disabled: {
+            type: Boolean,
+            observer: 'onDisabled'
+          }
+        };
+      }
+      onDisabled() {
+        if (this.disabled) {
+          this.style.pointerEvents = "none";
+          this.style.opacity = 0.5;
+        } else {
+          this.style.pointerEvents = "auto";
+          this.style.opacity = 1;
+        }
+      }
+    }
+    window.customElements.define(XButton.is, XButton);
+  </script>
+</dom-module>

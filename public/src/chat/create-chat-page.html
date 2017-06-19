@@ -1,0 +1,85 @@
+<link rel="import" href="../common/x-button.html">
+<link rel="import" href="../common/x-card.html">
+
+<dom-module id="create-chat-page">
+  <template>
+    <style is="custom-style" include="iron-flex iron-flex-alignment">
+      .fillContainer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        overflow: hidden;
+      }
+
+      .contentPanel {
+        max-width: 700px;
+        margin: auto;
+        width: 100%;
+      }
+
+      .content {
+        padding: 15px;
+      }
+
+      .buttons {
+        padding: 15px;
+        margin-top: 30px;
+      }
+
+      x-button {
+        min-width: 60px;
+        text-align: center;
+        margin-left: 10px;
+      }
+
+      label {
+        display: block;
+        font-weight: 400;
+        color: #808080;
+        letter-spacing: 0.05em;
+        font-size: 18px;
+      }
+
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        outline: none;
+        padding: 5px 3px;
+        font-size: 16px;
+        border: none;
+        border-bottom: 1px solid #d8d8d8;
+        font-family: inherit;
+        font-weight: 300;
+        margin-top: 10px;
+      }
+    </style>
+    <div class="fillContainer vertical layout">
+      <div class="flex"></div>
+      <div class="contentPanel">
+        <x-card>
+          <div class="content">
+            <label>Service Provider</label>
+            <input type="text" id="txtProvider" placeholder="Enter the provider URL" on-input="onInput">
+            <label style="margin-top: 25px;">Channel name</label>
+            <input type="text" id="txtChannel" placeholder="Enter a name" on-input="onInput">
+            <label style="margin-top: 25px;">Your name (as seen in this channel)</label>
+            <input type="text" id="txtName" placeholder="Your name" on-input="onInput">
+            <div class="buttons horizontal layout center">
+              <div class="flex"></div>
+              <div>
+                <x-button on-click="onCancel">Cancel</x-button>
+              </div>
+              <div>
+                <x-button id="btnCreate" on-click="onCreate">Create Channel</x-button>
+              </div>
+            </div>
+          </div>
+        </x-card>
+      </div>
+      <div class="flex"></div>
+    </div>
+  </template>
+  <script src="create-chat-page.js"></script>
+</dom-module>
