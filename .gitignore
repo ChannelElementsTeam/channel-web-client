@@ -2,3 +2,11 @@ node_modules
 dist
 public/bower_components
 shadow-public/bower_components
+
+# Editors
+.idea
+*.iml
+
+# OS metadata
+.DS_Store
+Thumbs.db
