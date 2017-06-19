@@ -40,7 +40,7 @@
       onData() {
         if (this.data) {
           this.set("message", this.data.message);
-          const payloadString = new TextDecoder('utf-8').decode(this.message.rawPayload);
+          const payloadString = new TextDecoder('utf-8').decode(this.message.binaryPayload || this.message.fullPayload);
           this.set("chatData", JSON.parse(payloadString));
           // console.log("Message view: ", this.data);
         }

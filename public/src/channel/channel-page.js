@@ -166,7 +166,8 @@ class ChannelPage extends Polymer.Element {
 
   onCompose(event) {
     const detail = event.detail;
-    $channels.sendMessage(this.channelInfo.channelId, detail.message, detail.history, detail.priority).then((messageInfo) => {
+    const payload = $channels.encode(detail.message);
+    $channels.sendMessage(this.channelInfo.channelId, null, payload, detail.history, detail.priority).then((messageInfo) => {
       this.push('items', {
         message: messageInfo,
         participant: this.participantByCode[this.joinData.participantCode]
