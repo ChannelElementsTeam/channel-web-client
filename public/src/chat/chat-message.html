@@ -1,0 +1,51 @@
+<dom-module id="chat-message">
+  <template>
+    <style is="custom-style" include="iron-flex iron-flex-alignment">
+      .container {
+        margin: 0 auto;
+        padding: 5px 15px;
+        font-size: 16px;
+      }
+
+      .sender {
+        font-size: 14px;
+        font-weight: bold;
+        color: #263238;
+        padding-right: 8px;
+        letter-spacing: 0.05em;
+        line-height: 22px;
+      }
+    </style>
+    <div class="container horizontal layout">
+      <div class="sender">
+        <sapn>{{data.participant.details.name}}</sapn>:
+      </div>
+      <div class="flex body">{{chatData.text}}</div>
+    </div>
+  </template>
+  <script>
+    class ChatMessage extends Polymer.Element {
+      static get is() { return "chat-message"; }
+      static get properties() {
+        return {
+          data: {
+            type: Object,
+            observer: 'onData'
+          },
+          message: Object,
+          chatData: Object
+        };
+      }
+
+      onData() {
+        if (this.data) {
+          this.set("message", this.data.message);
+          const payloadString = new TextDecoder('utf-8').decode(this.message.binaryPayload || this.message.fullPayload);
+          this.set("chatData", JSON.parse(payloadString));
+          // console.log("Message view: ", this.data);
+        }
+      }
+    }
+    window.customElements.define(ChatMessage.is, ChatMessage);
+  </script>
+</dom-module>

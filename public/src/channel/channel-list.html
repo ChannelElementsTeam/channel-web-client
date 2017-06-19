@@ -1,0 +1,18 @@
+<link rel="import" href="../../bower_components/polymer/lib/elements/dom-repeat.html">
+<link rel="import" href="channel-list-item.html">
+
+<dom-module id="channel-list">
+  <template>
+    <style>
+      .container {
+        padding-top: 20px;
+      }
+    </style>
+    <div class="container">
+      <template is="dom-repeat" items="{{list}}">
+        <channel-list-item data="{{item}}" on-click="onItemClick"></channel-list-item>
+      </template>
+    </div>
+  </template>
+  <script src="channel-list.js"></script>
+</dom-module>

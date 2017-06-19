@@ -1,0 +1,21 @@
+<link rel="import" href="../common/x-button.html">
+<dom-module id="home-page">
+  <template>
+    <style>
+      .buttons {
+        padding: 15px;
+        margin-top: 30px;
+        text-align: center;
+      }
+
+      x-button {
+        margin: 10px;
+      }
+    </style>
+    <div class="buttons">
+      <x-button on-click="onCreate">Create a new channel</x-button>
+      <x-button on-click="onJoin">Join a channel</x-button>
+    </div>
+  </template>
+  <script src="home-page.js"></script>
+</dom-module>
