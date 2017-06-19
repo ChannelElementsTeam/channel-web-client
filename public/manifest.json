@@ -1,0 +1,7 @@
+{
+  "name": "channels-web-client",
+  "short_name": "channels-web-client",
+  "description": "A sample web client for Channel Elements",
+  "start_url": "/",
+  "display": "standalone"
+}
