@@ -44,31 +44,25 @@ export interface ParticipantInfo {
   isCreator: boolean;
 }
 
-export interface ParticipantList {
+export interface ChannelInfo extends EventTarget {  // 'channel-participant-joined', 'channel-participant-left'
   participants: ParticipantInfo[];
-  addEventListener(event: string, callback: (data: any) => void);
+  sendCard(sender: ChannelWebComponent, data: JsonPlusBinaryMessage<any>): Promise<void>;  // for component in 'compose' mode
+  sendCardToCardMessage(sender: ChannelWebComponent, message: JsonPlusBinaryMessage<any>): Promise<void>; // for component in 'view' mode
 }
 
-export interface ParticipantListEvent {  // 'participant-added', 'participant-left'
+export interface ParticipantEvent { // 'channel-participant-joined', 'channel-participant-left'
   participant: ParticipantInfo;
 }
 
-export interface CardMessageDetailsEvent extends JsonPlusBinaryMessage<any>;  // 'add-card-to-send', 'card-to-card-to-send' events
-
-export interface ChannelWebComponent {
+export interface ChannelWebComponent extends HTMLElement {
   // parameters
   cardId: string;
   mode: string;  // 'compose', 'view'
+  channel: ChannelInfo; // component can add listeners
   data?: any;
   binary?: Uint8Array;
-  participantList: ParticipantList;  // supports addEventListener
 
-  // compose mode methods
-  handleCompositionSendCompleted(): void;  // sometime after this component fires 'add-card-to-send'
-
-  // view mode methods
-  handleCardToCardMessageReceived(sender: ParticipantInfo, details: CardToCardMessageDetails): void;
-  handleCardToCardMessageSent(success: boolean, errorMessage?: string): void;  // sometime after this component fires 'card-to-card-to-send'
+  // methods:  view-mode only
+  handleCardToCardMessageReceived(sender: ParticipantInfo, details: CardToCardMessageDetails): void; // view mode only
 }
-
-// Component also fires:  'resize' when it has unilaterally changed its own size (e.g., based on a message received)
+// Component fires:  'resize' when it has unilaterally changed its own size (e.g., based on a message received)
