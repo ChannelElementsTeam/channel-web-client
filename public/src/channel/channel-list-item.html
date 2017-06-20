@@ -1,0 +1,49 @@
+<dom-module id="channel-list-item">
+  <template>
+    <style>
+       :host {
+        display: block;
+      }
+
+      .container {
+        padding: 12px 10px;
+        font-weight: 400;
+        letter-spacing: 0.05em;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .container:hover {
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      .name {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+      }
+
+      a,
+      a:hover,
+      a:visited {
+        color: inherit !important;
+        text-decoration: none;
+      }
+    </style>
+    <div class="container">
+      <div class="name">{{data.details.name}}</div>
+    </div>
+  </template>
+  <script>
+    class ChannelListItem extends Polymer.Element {
+      static get is() { return "channel-list-item"; }
+      static get properties() {
+        return {
+          data: Object
+        };
+      }
+    }
+    window.customElements.define(ChannelListItem.is, ChannelListItem);
+  </script>
+</dom-module>
