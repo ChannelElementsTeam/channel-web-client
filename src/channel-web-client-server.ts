@@ -75,7 +75,7 @@ export class ChannelWebClientServer {
         .install([pkg], { production: true, json: true }, { directory: this.shadowComponentsDirectory })
         .on('end', (installed: any) => {
           if (pkgInfo && pkgInfo.pkgMeta && pkgInfo.pkgMeta.name && pkgInfo.pkgMeta.main) {
-            this.processComponent(pkgInfo, request, response).then(() => {
+            void this.processComponent(pkgInfo, request, response).then(() => {
               console.log("Component loaded", request.channelsContext.user.id, pkgInfo);
               resolve();
             }).catch((err) => {

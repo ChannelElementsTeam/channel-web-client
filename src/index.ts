@@ -91,7 +91,7 @@ class ChannelElementsWebClient {
     this.app.use(cookieParser());
 
     this.app.use((req: Request, res: Response, next: NextFunction) => {
-      this.channelWebClientServer.initializeRequest(req as ChannelsRequest, res).then(() => {
+      void this.channelWebClientServer.initializeRequest(req as ChannelsRequest, res).then(() => {
         next();
       });
     });
