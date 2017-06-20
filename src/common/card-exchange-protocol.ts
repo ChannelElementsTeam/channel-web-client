@@ -59,6 +59,8 @@ export interface ChannelWebComponent extends HTMLElement {
   cardId: string;
   mode: string;  // 'compose', 'view'
   channel: ChannelInfo; // component can add listeners
+
+  // properties:  view-mode only
   data?: any;
   binary?: Uint8Array;
 
