@@ -1,25 +1,26 @@
-class CreateChatPage extends Polymer.Element {
-  static get is() { return "create-chat-page"; }
-
+class CreateChannelDialog extends Polymer.Element {
+  static get is() { return 'create-channel-dlg'; }
+  show() {
+    this.$.txtProvider.value = "";
+    this.$.txtChannel.value = "";
+    this.$.txtName.value = "";
+    this.onInput();
+    this.$.dlg.show();
+  }
+  hide() {
+    this.$.dlg.hide();
+  }
   onCancel() {
-    $router.goto("")
+    this.hide();
   }
-
-  connectedCallback() {
-    super.connectedCallback();
-    Polymer.RenderStatus.beforeNextRender(this, () => {
-      this.onInput();
-    });
-  }
-
   onInput() {
     const provider = this.$.txtProvider.value.trim();
     const channel = this.$.txtChannel.value.trim();
     const name = this.$.txtName.value.trim();
     this.$.btnCreate.disabled = !(provider && channel && name);
   }
-
   onCreate() {
+    this.hide();
     const provider = this.$.txtProvider.value.trim();
     const channel = this.$.txtChannel.value.trim();
     const name = this.$.txtName.value.trim();
@@ -37,4 +38,4 @@ class CreateChatPage extends Polymer.Element {
     }
   }
 }
-window.customElements.define(CreateChatPage.is, CreateChatPage);
+window.customElements.define(CreateChannelDialog.is, CreateChannelDialog);

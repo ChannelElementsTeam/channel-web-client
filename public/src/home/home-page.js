@@ -2,7 +2,9 @@ class HomePage extends Polymer.Element {
   static get is() { return 'home-page'; }
 
   onCreate() {
-    $router.goto("new-channel")
+    Polymer.importHref(this.resolveUrl("../dialogs/create-channel-dlg.html"), () => {
+      this.$.dlgCreate.show();
+    });
   }
 
   onJoin() {

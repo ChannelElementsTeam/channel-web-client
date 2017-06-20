@@ -7,15 +7,22 @@
         text-transform: uppercase;
         padding: 8px 12px;
         font-size: 16px;
-        background: #009688;
-        color: #fff;
         cursor: pointer;
-        border-radius: 3px;
         transition: all 0.2s ease;
+        border: 3px solid #263238;
+        background: none;
+        color: #263238;
       }
 
        :host(:hover) {
         box-shadow: 0 4px 5px -1px rgba(0, 0, 0, 0.4);
+      }
+
+      .disabled {
+        pointer-events: none;
+        opacity: 0.5;
+        background: rgba(0, 0, 0, 0.1);
+        border-color: rgba(0, 0, 0, 0.1);
       }
     </style>
     <div>
@@ -37,9 +44,13 @@
         if (this.disabled) {
           this.style.pointerEvents = "none";
           this.style.opacity = 0.5;
+          this.style.background = "rgba(0,0,0,0.1)";
+          this.style.borderColor = "rgba(0,0,0,0.1)";
         } else {
           this.style.pointerEvents = "auto";
           this.style.opacity = 1;
+          this.style.background = "";
+          this.style.borderColor = "";
         }
       }
     }
