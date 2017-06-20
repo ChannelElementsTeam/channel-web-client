@@ -5,6 +5,7 @@ export class UrlManager {
   constructor(version: number) {
     this.version = version;
   }
+
   getPublicBaseUrl(absolute = false): string {
     const baseUrl = '/v' + this.version;
     if (absolute) {
@@ -18,6 +19,25 @@ export class UrlManager {
       return configuration.get('baseClientUri') + '/d';
     } else {
       return '/d';
+    }
+  }
+
+  getStaticBaseUrl(absolute = false): string {
+    if (absolute) {
+      return configuration.get('baseClientUri') + '/s';
+    } else {
+      return '/s';
+    }
+  }
+
+  getStaticUrl(relativeUrl: string, absolute = false): string {
+    if (!relativeUrl.startsWith('/')) {
+      relativeUrl = '/' + relativeUrl;
+    }
+    if (absolute) {
+      return configuration.get('baseClientUri') + '/s' + relativeUrl;
+    } else {
+      return '/s' + relativeUrl;
     }
   }
 
