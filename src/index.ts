@@ -19,7 +19,6 @@ import { UrlManager } from './url-manager';
 import { rootPageHandler } from './page-handlers/root-handler';
 
 const VERSION = 1;
-const DYNAMIC_BASE = '/d';
 
 class ChannelElementsWebClient {
   private app: express.Application;
@@ -41,7 +40,7 @@ class ChannelElementsWebClient {
     await db.initialize();
     this.shadowPublicDirectory = configuration.get('components.path', path.join(__dirname, '../shadow-public'));
     await this.setupExpress();
-    this.channelWebClientServer = new ChannelWebClientServer(this.app, this.server, configuration.get('baseClientUri'), DYNAMIC_BASE, this.shadowPublicDirectory, '/v' + VERSION);
+    this.channelWebClientServer = new ChannelWebClientServer(this.app, this.server, configuration.get('baseClientUri'), this.urlManager.getDynamicBaseUrl(), this.shadowPublicDirectory, '/v' + VERSION);
     await this.channelWebClientServer.start();
     await this.setupServerPing();
     this.started = Date.now();
@@ -149,7 +148,7 @@ class ChannelElementsWebClient {
   }
 
   private setupServerPing(): void {
-    this.app.get(DYNAMIC_BASE + '/ping', (request: Request, response: Response) => {
+    this.app.get(this.urlManager.getDynamicUrl('/ping'), (request: Request, response: Response) => {
       response.setHeader('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate');
       response.setHeader('Content-Type', 'application/json');
       const result: any = {
