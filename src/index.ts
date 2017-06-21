@@ -18,7 +18,7 @@ import { RestServer } from './interfaces/rest-server';
 import { UrlManager } from './url-manager';
 import { rootPageHandler } from './page-handlers/root-handler';
 
-const VERSION = 1;
+const VERSION = 2;
 
 class ChannelElementsWebClient {
   private app: express.Application;
@@ -148,7 +148,7 @@ class ChannelElementsWebClient {
   }
 
   private setupServerPing(): void {
-    this.app.get(this.urlManager.getDynamicUrl('/ping'), (request: Request, response: Response) => {
+    this.app.get('/ping', (request: Request, response: Response) => {
       response.setHeader('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate');
       response.setHeader('Content-Type', 'application/json');
       const result: any = {
@@ -158,6 +158,7 @@ class ChannelElementsWebClient {
         deployed: new Date(this.started).toISOString(),
         server: configuration.get('serverId')
       };
+      response.json(result);
     });
   }
 
