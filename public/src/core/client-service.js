@@ -81,6 +81,8 @@ class ClientService {
     super();
     this.rest = new RestService();
     this.restBase = document.getElementById('restBase').getAttribute('href') || "";
+
+    this.dbService = new DbService();
     this.componentManager = new ComponentManager(this);
   }
 

@@ -1,28 +1,39 @@
 class ComponentManager {
   constructor(service) {
     this.service = service;
-    this.componentMap = {};
   }
 
-  getComponent(packageName) {
+  get(packageName, forceFetch) {
     return new Promise((resolve, reject) => {
-      if (this.componentMap[service]) {
-        resolve(this.componentMap[service].data);
-      } else {
-        this.service.fetchComponent(packageName).then((response) => {
-          this.componentMap[packageName] = {
-            loaded: false,
-            data: response
-          };
+      const doFetch = () => {
+        this._fetchComponent(packageName).then((response) => {
+          this.service.dbService.saveComponent(response).then(() => { });
           resolve(response);
-        }).catch((err) => {
-          reject(err);
         });
+      };
+      if (forceFetch) {
+        doFetch();
+        return;
       }
+      this.service.dbService.open().then(() => {
+        this.service.dbService.getComponent(packageName).then((response) => {
+          if (response) {
+            resolve(response);
+          } else {
+            doFetch();
+          }
+        });
+      }).catch(() => {
+        doFetch();
+      });
     });
   }
 
-  loadComponent(packageName) {
+  _fetchComponent(packageName) {
+    return this.service.fetchComponent(packageName);
+  }
 
+  list() {
+    return this.service.dbService.getAllComponents();
   }
 }
