@@ -78,7 +78,6 @@ class RestService {
 
 class ClientService {
   constructor() {
-    super();
     this.rest = new RestService();
     this.restBase = document.getElementById('restBase').getAttribute('href') || "";
 
