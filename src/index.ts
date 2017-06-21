@@ -158,6 +158,7 @@ class ChannelElementsWebClient {
         deployed: new Date(this.started).toISOString(),
         server: configuration.get('serverId')
       };
+      response.json(result);
     });
   }
 
