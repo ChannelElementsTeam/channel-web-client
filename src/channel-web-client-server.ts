@@ -31,7 +31,7 @@ export class ChannelWebClientServer {
   }
 
   private registerHandlers(restRelativeBaseUrl: string): void {
-    this.app.get(restRelativeBaseUrl + '/component', (request: Request, response: Response) => {
+    this.app.post(restRelativeBaseUrl + '/component', (request: Request, response: Response) => {
       void this.handleComponent(request as ChannelsRequest, response);
     });
   }
