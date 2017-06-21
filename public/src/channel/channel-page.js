@@ -17,7 +17,7 @@ class ChannelPage extends Polymer.Element {
 
   setBottomDrawer(open) {
     if (open) {
-      this.$.picker.reset();
+      this.$.picker.refresh();
       this.$.bottomDrawer.style.display = "";
       this.$.glassPane.style.display = "";
       setTimeout(() => {
@@ -32,6 +32,20 @@ class ChannelPage extends Polymer.Element {
         this.$.glassPane.style.display = "none";
       }, 500);
     }
+  }
+
+  onComposerSelected(event) {
+    this.setBottomDrawer(false);
+    var pkg = event.detail;
+    if (pkg && pkg.importHref) {
+      Polymer.importHref(this.resolveUrl(pkg.importHref), () => {
+        this.switchToComposer(pkg);
+      });
+    }
+  }
+
+  switchToComposer(pkg) {
+    console.log("switched", pkg);
   }
 }
 window.customElements.define(ChannelPage.is, ChannelPage);

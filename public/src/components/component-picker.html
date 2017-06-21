@@ -37,7 +37,7 @@
       }
 
       .name {
-        font-size: 15px;
+        font-size: 14px;
         font-weight: 400;
         color: #555;
         letter-spacing: 0.05em;
@@ -65,7 +65,8 @@
         overflow: hidden;
       }
 
-      #importPanel {
+      #importPanel,
+      #loadingPanel {
         background: white;
       }
 
@@ -103,7 +104,7 @@
     </style>
     <div id="container" class="horizontal layout wrap">
       <template is="dom-repeat" items="{{items}}">
-        <div class="item">
+        <div class="item" on-click="onItemClick">
           <div class="name">{{item.package.name}}</div>
           <div class="description">{{item.package.description}}</div>
         </div>
@@ -121,6 +122,11 @@
             <x-button id="btnImport" on-click="onSubmit">Import</x-button>
           </div>
         </div>
+        <div class="flex"></div>
+      </div>
+      <div id="loadingPanel" class="fillContainer vertical layout" style="display: none;">
+        <div class="flex"></div>
+        <div>Importing package...</div>
         <div class="flex"></div>
       </div>
     </div>

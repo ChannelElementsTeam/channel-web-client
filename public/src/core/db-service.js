@@ -42,60 +42,66 @@ class DbService {
   }
 
   saveComponent(component) {
-    return new Promise((resolve, reject) => {
-      const store = this.getStore(this.STORE_COMPONENTS, this.MODE_READWRITE);
-      try {
-        const request = store.add(component);
-        request.onerror = (event) => {
-          console.error("Error saving component to db: ", event);
-          reject(new Error("Error saving component: " + event));
-        };
-        request.onsuccess = (event) => {
-          resolve();
-        };
-      } catch (ex) {
-        reject(ex);
-      }
+    return this.open().then(() => {
+      return new Promise((resolve, reject) => {
+        const store = this.getStore(this.STORE_COMPONENTS, this.MODE_READWRITE);
+        try {
+          const request = store.put(component);
+          request.onerror = (event) => {
+            console.error("Error saving component to db: ", event);
+            reject(new Error("Error saving component: " + event));
+          };
+          request.onsuccess = (event) => {
+            resolve();
+          };
+        } catch (ex) {
+          reject(ex);
+        }
+      });
     });
   }
 
   getComponent(packageName, source) {
-    return new Promise((resolve, reject) => {
-      const store = this.getStore(this.STORE_COMPONENTS, this.MODE_READ);
-      let request;
-      if (packageName) {
-        request = store.get(packageName);
-      } else {
-        request = store.index("source").get(source);
-      }
-      request.onerror = (event) => {
-        console.error("Failed to load component from DB: ", event);
-        reject(new Error("Failed to load component: " + event));
-      };
-      request.onsuccess = (event) => {
-        resolve(request.result);
-      };
+    return this.open().then(() => {
+      return new Promise((resolve, reject) => {
+        const store = this.getStore(this.STORE_COMPONENTS, this.MODE_READ);
+        let request;
+        if (packageName) {
+          request = store.get(packageName);
+        } else {
+          request = store.index("source").get(source);
+        }
+        request.onerror = (event) => {
+          console.error("Failed to load component from DB: ", event);
+          reject(new Error("Failed to load component: " + event));
+        };
+        request.onsuccess = (event) => {
+          resolve(request.result);
+        };
+      });
     });
   }
 
   getAllComponents() {
-    return new Promise((resolve, reject) => {
-      const store = this.getStore(this.STORE_COMPONENTS, this.MODE_READ);
-      const request = store.openCursor();
-      const result = [];
-      request.onerror = (event) => {
-        console.error("Failed to open components cursor: ", event);
-        reject(new Error("Failed to open components cursor: " + event));
-      };
-      request.onsuccess = (event) => {
-        const cursor = event.target.result;
-        if (cursor) {
-          result.push(cursor.value);
-          cursor.continue();
-        } else {
-          resolve(result);
-        }
-      };
+    return this.open().then(() => {
+      return new Promise((resolve, reject) => {
+        const store = this.getStore(this.STORE_COMPONENTS, this.MODE_READ);
+        const request = store.openCursor();
+        const result = [];
+        request.onerror = (event) => {
+          console.error("Failed to open components cursor: ", event);
+          reject(new Error("Failed to open components cursor: " + event));
+        };
+        request.onsuccess = (event) => {
+          const cursor = event.target.result;
+          if (cursor) {
+            result.push(cursor.value);
+            cursor.continue();
+          } else {
+            resolve(result);
+          }
+        };
+      });
     });
   }
 }
