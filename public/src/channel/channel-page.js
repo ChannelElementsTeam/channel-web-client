@@ -44,8 +44,19 @@ class ChannelPage extends Polymer.Element {
     }
   }
 
+  clearElement(node) {
+    while (node.hasChildNodes()) {
+      node.removeChild(node.lastChild);
+    }
+  }
+
   switchToComposer(pkg) {
     console.log("switched", pkg);
+    this.clearElement(this.$.composerPanel);
+    var e = document.createElement(pkg.channelComponent.composerTag);
+    this.$.composerPanel.appendChild(e);
+    this.$.noComposer.style.display = "none";
+    this.$.composerPanel.style.display = "";
   }
 }
 window.customElements.define(ChannelPage.is, ChannelPage);
