@@ -1,4 +1,6 @@
 <link rel="import" href="../../bower_components/polymer/lib/elements/dom-repeat.html">
+<link rel="import" href="../common/card-utils.html">
+<link rel="import" href="../core/channel-controller.html">
 
 <dom-module id="channel-page">
   <template>
@@ -104,6 +106,7 @@
         <component-picker id="picker" on-select="onComposerSelected"></component-picker>
       </div>
     </div>
+    <channel-controller id="controller"></channel-controller>
   </template>
   <script src="channel-page.js"></script>
 </dom-module>
