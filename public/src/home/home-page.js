@@ -8,7 +8,9 @@ class HomePage extends Polymer.Element {
   }
 
   onJoin() {
-    $router.goto("join-channel");
+    Polymer.importHref(this.resolveUrl("../dialogs/join-channel-dlg.html"), () => {
+      this.$.dlgJoin.show();
+    });
   }
 }
 
