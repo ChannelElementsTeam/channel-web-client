@@ -243,7 +243,7 @@ class ChannelPage extends Polymer.Element {
         }
         case 'card-to-card':
           // find card item with the spciedif id
-          const cardView = this.shadowRoot.querySelector('channel-card[@data-card="' + msgDetails.cardId + '"]');
+          const cardView = this.shadowRoot.querySelector('channel-card[data-card="' + msgDetails.cardId + '"]');
           if (cardView) {
             cardView.handleCardToCardMessage(detail);
           } else {

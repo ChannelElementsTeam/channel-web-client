@@ -39,7 +39,7 @@ class ChannelCard extends Polymer.Element {
 
   handleCardToCardMessage(detail) {
     if (this.element && this.element.handleCardToCardMessageReceived) {
-      this.element.handleCardToCardMessageReceived(detail.participant, this.channelMessage.json.details);
+      this.element.handleCardToCardMessageReceived(detail.participant, detail.channelMessage);
     }
   }
 }
