@@ -96,7 +96,7 @@ class ChannelPage extends Polymer.Element {
       before: (new Date()).getTime(),
       maxCount: 100
     }).then((response) => {
-      console.log("Histroy: ", response);
+      console.log("History: ", response);
     });
   }
 
@@ -178,6 +178,7 @@ class ChannelPage extends Polymer.Element {
   // handle events from controller
 
   onMessage(event) {
+    console.log("ON MESSAGE", event);
     var detail = event.detail;
     if (detail) {
       this.processMessage(detail, false);
@@ -238,6 +239,7 @@ class ChannelPage extends Polymer.Element {
     } else {
       this.push('items', itemData);
     }
+    // TODO: not efficient because shit renders list again when bound
   }
 }
 window.customElements.define(ChannelPage.is, ChannelPage);

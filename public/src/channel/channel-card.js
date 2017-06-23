@@ -2,14 +2,16 @@ class ChannelCard extends Polymer.Element {
   static get is() { return 'channel-card'; }
   static get properties() {
     return {
-      data: Object,
+      data: {
+        type: Object,
+        observer: 'refresh'
+      },
       channel: Object
     }
   }
 
   connectedCallback() {
     super.connectedCallback();
-    this.refresh();
   }
 
   refresh() {
@@ -24,7 +26,7 @@ class ChannelCard extends Polymer.Element {
       e.binary = this.data.channelMessage.binary;
       this.$.cardContainer.appendChild(e);
       this.element = e;
-      console.log("data", this.data);
+      // console.log("data", this.data.channelMessage.json.details.data);
     }
   }
 

@@ -80,7 +80,8 @@
       <div class="flex" style="position: relative;">
         <div id="scrollPanel" class="fillContainer verticalScroll">
           <template is="dom-repeat" items="{{items}}">
-            <channel-card data="{{item.detail}}" channel="{{item.channel}}" data-card$="{{item.cardId}}"></channel-card>
+            <channel-card data="{{item.detail}}" channel="{{item.channel}}" data-text$="{{item.detail.channelMessage.json.details.data.text}}"
+              data-card$="{{item.cardId}}"></channel-card>
           </template>
         </div>
       </div>

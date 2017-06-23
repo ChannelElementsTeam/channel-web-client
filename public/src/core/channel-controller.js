@@ -189,6 +189,17 @@ class ChannelController extends Polymer.Element {
     return [];
   }
 
+  get me() {
+    for (var key in this.participantByCode) {
+      if (this.participantByCode.hasOwnProperty(key)) {
+        let p = this.participantByCode[key];
+        if (p.isYou || p.isMe) {
+          return p;
+        }
+      }
+    }
+  }
+
   onData() {
     this.participantById = {};
     this.participantByCode = {};
@@ -213,14 +224,18 @@ class ChannelController extends Polymer.Element {
         const message = CardUtils.addCardMessage(this.joinData.channelCode, this.joinData.participantCode, sender.packageSource, messageData, history, priority);
         $channels.sendMessage(this.channelInfo.channelId, message).then(() => {
           resolve();
-
-          // TODO: handle message
-          const event = new CustomEvent('message', { bubbles: true, composed: true, detail: message });
-          try {
-            this.dispatchEvent(event);
-          } catch (ex) {
-            console.error("Exception in message event handler:", event);
-          }
+          const event = new CustomEvent('message', {
+            bubbles: true, composed: true, detail: {
+              message: message,
+              channelMessage: {
+                valid: true,
+                json: message.jsonMessage,
+                binary: message.binaryPayload
+              },
+              participant: this.me
+            }
+          });
+          this.dispatchEvent(event);
         }).catch((err) => {
           console.error("Failed to send message: ", err);
           reject(err);
