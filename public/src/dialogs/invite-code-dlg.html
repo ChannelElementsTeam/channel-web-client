@@ -1,6 +1,6 @@
 <link rel="import" href="../common/x-dialog.html">
 <link rel="import" href="../common/x-button.html">
-<dom-module id="create-channel-dlg">
+<dom-module id="invite-code-dlg">
   <template>
     <style is="custom-style" include="iron-flex iron-flex-alignment">
       .content {
@@ -39,25 +39,41 @@
         margin-top: 10px;
       }
     </style>
-    <x-dialog id="dlg" headline="New Channel">
+    <x-dialog id="dlg" headline="Invite Code">
       <div class="content">
-        <label>Service Provider</label>
-        <input type="text" id="txtProvider" placeholder="Enter the provider URL" on-input="onInput">
-        <label style="margin-top: 25px;">Channel name</label>
-        <input type="text" id="txtChannel" placeholder="Enter a name" on-input="onInput">
-        <label style="margin-top: 25px;">Your name (as seen in this channel)</label>
-        <input type="text" id="txtName" placeholder="Your name" on-input="onInput">
+        <label>Share this code to invite someone to this channel</label>
+        <input type="text" id="txt">
         <div class="buttons horizontal layout center">
           <div class="flex"></div>
           <div>
-            <x-button on-click="onCancel">Cancel</x-button>
-          </div>
-          <div>
-            <x-button id="btnCreate" on-click="onCreate">Create Channel</x-button>
+            <x-button on-click="onClose">Close</x-button>
           </div>
         </div>
       </div>
     </x-dialog>
   </template>
-  <script src="create-channel-dlg.js"></script>
+  <script>
+    class InviteCodeDialog extends Polymer.Element {
+      static get is() { return 'invite-code-dlg'; }
+      static get properties() {
+        return {
+          code: String
+        };
+      }
+      show() {
+        this.$.txt.value = this.code || "";
+        this.$.dlg.show();
+        setTimeout(() => {
+          this.$.txt.select();
+        }, 100);
+      }
+      hide() {
+        this.$.dlg.hide();
+      }
+      onClose() {
+        this.hide();
+      }
+    }
+    window.customElements.define(InviteCodeDialog.is, InviteCodeDialog);
+  </script>
 </dom-module>

@@ -60,7 +60,7 @@
       <div class="content">
         <div id="contentPanel" class="contentPanel">
           <div class="toolbar horizontal layout center">
-            <div class="flex">{{title}}</div>
+            <div class="flex">{{headline}}</div>
           </div>
           <div class="main">
             <slot></slot>
@@ -75,7 +75,7 @@
       static get is() { return 'x-dialog'; }
       static get properties() {
         return {
-          title: String
+          headline: String
         };
       }
       show() {

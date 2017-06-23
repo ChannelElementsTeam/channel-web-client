@@ -105,6 +105,19 @@ class ChannelPage extends Polymer.Element {
     $channels.deleteChannel(this.channelInfo.registerUrl, this.channelInfo.channelUrl).then(() => { });
   }
 
+  shareChannel() {
+    const shareRequest = {
+      channelId: this.channelInfo.channelId,
+      details: {}
+    };
+    $channels.shareChannel(this.channelInfo.registerUrl, shareRequest).then((shareResponse) => {
+      Polymer.importHref(this.resolveUrl("../dialogs/invite-code-dlg.html"), () => {
+        this.$.dlgInvite.code = shareResponse.shareCodeUrl;
+        this.$.dlgInvite.show();
+      });
+    });
+  }
+
   // Compose area support methods
 
   onComponents() {
