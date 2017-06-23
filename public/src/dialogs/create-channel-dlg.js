@@ -1,9 +1,9 @@
 class CreateChannelDialog extends Polymer.Element {
   static get is() { return 'create-channel-dlg'; }
   show() {
-    this.$.txtProvider.value = "";
+    this.$.txtProvider.value = $service.dbService.getLocal("last-provider-url") || "";
     this.$.txtChannel.value = "";
-    this.$.txtName.value = "";
+    this.$.txtName.value = $service.dbService.getLocal("last-name-used") || "";
     this.onInput();
     this.$.dlg.show();
   }
@@ -25,6 +25,8 @@ class CreateChannelDialog extends Polymer.Element {
     const channel = this.$.txtChannel.value.trim();
     const name = this.$.txtName.value.trim();
     if (provider && channel && name) {
+      $service.dbService.setLocal("last-provider-url", provider);
+      $service.dbService.setLocal("last-name-used", name);
       $channels.register(provider, {}).then((registry) => {
         $channels.createChannel(registry.services.registrationUrl, {
           channelDetails: { name: channel },

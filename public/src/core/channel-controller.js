@@ -3,12 +3,10 @@ class ChannelController extends Polymer.Element {
   static get properties() {
     return {
       channelInfo: {
-        type: Object,
-        observer: 'onData'
+        type: Object
       },
       joinData: {
-        type: Object,
-        observer: 'onData'
+        type: Object
       }
     };
   }
@@ -21,6 +19,7 @@ class ChannelController extends Polymer.Element {
 
   attach() {
     this._attached = true;
+    this.onData();
     this._attachListeners();
   }
 

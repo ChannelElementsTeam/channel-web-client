@@ -23,6 +23,11 @@ class ChannelPage extends Polymer.Element {
 
   onDeactivate() {
     this.setBottomDrawer(false);
+    this.$.controller.detach();
+    if (this.joinData) {
+      $channels.leaveChannel({ channelId: this.joinData.channelId }).then(() => { });
+      this.joinData = null;
+    }
   }
 
   refresh(info) {
