@@ -1,6 +1,6 @@
 class ChannelController extends Polymer.Element {
   static get is() { return "channel-controller" }
-  static get Properties() {
+  static get properties() {
     return {
       channelInfo: {
         type: Object,
@@ -86,8 +86,21 @@ class ChannelController extends Polymer.Element {
   }
 
   handleHistoryMessage(details, message) {
-    console.log("History message", details, message);
-    // TODO: 
+    const channelMessage = this._parseChannelMessage(message.fullPayload);
+    if (channelMessage.valid) {
+    } else {
+      console.warn("Ignoring history message: ", channelMessage.errorMessage, message);
+      return;
+    }
+    const participantInfo = this.participantById[details.participantId];
+    const event = new CustomEvent('history-message', {
+      bubbles: true, composed: true, detail: {
+        message: message,
+        channelMessage: channelMessage,
+        participant: participantInfo
+      }
+    });
+    this.dispatchEvent(event);
   }
 
   handleMessage(message) {
@@ -101,8 +114,33 @@ class ChannelController extends Polymer.Element {
   }
 
   handleChannelDelete(notification) {
-    console.log("Deleted", notification);
-    // TODO: 
+    if (this.channelInfo) {
+      const chid = notification.channelId;
+      if (chid === this.channelInfo.channelId) {
+        const event = new CustomEvent('delete', { bubbles: true, composed: true, detail: notification });
+        this.dispatchEvent(event);
+      }
+    }
+    const event = new CustomEvent('refresh-channels', { bubbles: true, composed: true, detail: {} });
+    window.dispatchEvent(event);
+  }
+
+  _parseChannelMessage(payload) {
+    const deserializedCardExchangeMessage = { valid: false };
+    const view = new DataView(payload.buffer, payload.byteOffset);
+    const jsonLength = view.getUint32(0);
+    try {
+      const jsonString = new TextDecoder("utf-8").decode(payload.subarray(4, 4 + jsonLength));
+      deserializedCardExchangeMessage.json = JSON.parse(jsonString);
+      if (payload.byteLength > (4 + jsonLength)) {
+        deserializedCardExchangeMessage.binary = new Uint8Array(payload, payload.byteOffset + 4 + jsonLength, payload.byteLength - 4 - jsonLength);
+      }
+      deserializedCardExchangeMessage.valid = true;
+    } catch (err) {
+      deserializedCardExchangeMessage.valid = false;
+      deserializedCardExchangeMessage.errorMessage = err.message || "Invalid payload";
+    }
+    return deserializedCardExchangeMessage;
   }
 
   // this.deleteChannelCallback = (notification) => {
@@ -116,18 +154,7 @@ class ChannelController extends Polymer.Element {
   //     window.dispatchEvent(event);
   //   };
 
-  // handleHistoryMessage(details, message) {
-  //   if (message && details) {
-  //     const p = this.participantById[details.participantId];
-  //     if (p) {
-  //       // TODO: add message
-  //       // this.unshift('items', {
-  //       //   message: message,
-  //       //   participant: p
-  //       // });
-  //     }
-  //   }
-  // }
+
   // handleParticipant(joined, left) {
   //   if (joined) {
   //     var data = {
@@ -177,7 +204,7 @@ class ChannelController extends Polymer.Element {
         console.warn("Ignoring new card message. Channel not joined.");
         reject(new Error("Ignoring new card message. Channel not joined."));
       } else {
-        const message = CardUtils.addCardMessage(this.joinData.channelCode, this.joinData.participantCode, sender.packageName, messageData, history, priority);
+        const message = CardUtils.addCardMessage(this.joinData.channelCode, this.joinData.participantCode, sender.packageSource, messageData, history, priority);
         $channels.sendMessage(this.channelInfo.channelId, message).then(() => {
           resolve();
 

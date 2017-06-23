@@ -100,6 +100,10 @@ class ChannelPage extends Polymer.Element {
     });
   }
 
+  deleteChannel() {
+    $channels.deleteChannel(this.channelInfo.registerUrl, this.channelInfo.channelUrl).then(() => { });
+  }
+
   // Compose area support methods
 
   onComponents() {
@@ -168,6 +172,57 @@ class ChannelPage extends Polymer.Element {
     } else {
       this.$.composeArea.style.opacity = 0;
       this.$.composeArea.style.pointerEvents = "none";
+    }
+  }
+
+  // handle events from controller
+
+  onHistoryMessage(event) {
+    var detail = event.detail;
+    if (detail) {
+      this.processMessage(detail, true);
+    }
+  }
+
+  onChannelDeleted() {
+    $router.goto("");
+  }
+
+  processMessage(detail, history) {
+    const channelMessage = detail.channelMessage;
+    if (channelMessage.valid) {
+      const msg = channelMessage.json;
+      const msgDetails = msg.details;
+      switch (msg.type) {
+        case 'add-card': {
+          $service.componentManager.get(msgDetails.package).then((pkg) => {
+            Polymer.importHref(this.resolveUrl(pkg.importHref), () => {
+              detail.package = pkg;
+              this.insertMessage(detail, history);
+            });
+          }).catch((err) => {
+            console.error("Failed to import component", err);
+          });
+          break;
+        }
+        case '':
+          // TODO: 
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
+  insertMessage(detail, atTop) {
+    const itemData = {
+      detail: detail,
+      channel: this.$.controller
+    }
+    if (atTop) {
+      this.unshift('items', itemData);
+    } else {
+      this.push('items', itemData);
     }
   }
 }

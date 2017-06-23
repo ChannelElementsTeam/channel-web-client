@@ -1,6 +1,7 @@
 <link rel="import" href="../../bower_components/polymer/lib/elements/dom-repeat.html">
 <link rel="import" href="../common/card-utils.html">
 <link rel="import" href="../core/channel-controller.html">
+<link rel="import" href="channel-card.html">
 
 <dom-module id="channel-page">
   <template>
@@ -79,7 +80,7 @@
       <div class="flex" style="position: relative;">
         <div id="scrollPanel" class="fillContainer verticalScroll">
           <template is="dom-repeat" items="{{items}}">
-            <channel-card></channel-card>
+            <channel-card data="{{item.detail}}" channel="{{item.channel}}"></channel-card>
           </template>
         </div>
       </div>
@@ -106,7 +107,7 @@
         <component-picker id="picker" on-select="onComposerSelected"></component-picker>
       </div>
     </div>
-    <channel-controller id="controller"></channel-controller>
+    <channel-controller id="controller" on-history-message="onHistoryMessage" on-delete="onChannelDeleted"></channel-controller>
   </template>
   <script src="channel-page.js"></script>
 </dom-module>
