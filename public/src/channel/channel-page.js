@@ -71,6 +71,7 @@ class ChannelPage extends Polymer.Element {
         console.log("Joined channel: ", joinResponse);
         this.set("joinData", joinResponse);
         this.enableComposeArea(true);
+        this.loadLastComposer();
       });
     }).catch((err) => {
       console.error(err);
@@ -107,9 +108,7 @@ class ChannelPage extends Polymer.Element {
   // Compose area support methods
 
   onComponents() {
-    Polymer.importHref(this.resolveUrl("../components/component-picker.html"), () => {
-      this.setBottomDrawer(true);
-    });
+    this.setBottomDrawer(true);
   }
 
   onCancelDrawer() {
@@ -159,10 +158,22 @@ class ChannelPage extends Polymer.Element {
     e.packageSource = pkg.source;
     e.mode = "compose";
     e.channel = this.$.controller;
+    this.currentComposeElement = e;
 
     this.$.composerPanel.appendChild(e);
     this.$.noComposer.style.display = "none";
     this.$.composerPanel.style.display = "";
+
+    $service.dbService.setLocal("last-compose-package", pkg.source);
+  }
+
+  loadLastComposer() {
+    if (!this.currentComposeElement) {
+      var packageSource = $service.dbService.getLocal("last-compose-package");
+      if (packageSource) {
+        this.$.picker.loadComponent(packageSource, false);
+      }
+    }
   }
 
   enableComposeArea(enabled) {
@@ -178,7 +189,6 @@ class ChannelPage extends Polymer.Element {
   // handle events from controller
 
   onMessage(event) {
-    console.log("ON MESSAGE", event);
     var detail = event.detail;
     if (detail) {
       this.processMessage(detail, false);

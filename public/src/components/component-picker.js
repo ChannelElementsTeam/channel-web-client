@@ -45,7 +45,7 @@ class ComponentPicker extends Polymer.Element {
   onSubmit() {
     const url = this.$.txtUrl.value.trim();
     if (url) {
-      this.loadComponent(url);
+      this.loadComponent(url, true);
     }
   }
 
@@ -54,10 +54,10 @@ class ComponentPicker extends Polymer.Element {
     this.dispatchEvent(newEvent);
   }
 
-  loadComponent(url) {
+  loadComponent(url, force) {
     this.$.importPanel.style.display = "none";
     this.$.loadingPanel.style.display = "";
-    $service.componentManager.get(url, true).then((result) => {
+    $service.componentManager.get(url, force).then((result) => {
       console.log("Loaded component: ", result);
       const event = new CustomEvent('select', { bubbles: true, composed: true, detail: result });
       this.dispatchEvent(event);
