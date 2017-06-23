@@ -44,13 +44,13 @@ export interface ParticipantInfo {
   isCreator: boolean;
 }
 
-export interface ChannelInfo extends EventTarget {  // 'channel-participant-joined', 'channel-participant-left'
+export interface ChannelInfo extends EventTarget {  // 'participant-joined', 'participant-left'
   participants: ParticipantInfo[];
   sendCard(sender: ChannelWebComponent, data: JsonPlusBinaryMessage<any>, history: boolean, priority: boolean): Promise<void>;  // for component in 'compose' mode
   sendCardToCardMessage(sender: ChannelWebComponent, message: JsonPlusBinaryMessage<any>, history: boolean, priority: boolean): Promise<void>; // for component in 'view' mode
 }
 
-export interface ParticipantEvent { // 'channel-participant-joined', 'channel-participant-left'
+export interface ParticipantEvent { // 'participant-joined', 'participant-left'
   participant: ParticipantInfo;
 }
 

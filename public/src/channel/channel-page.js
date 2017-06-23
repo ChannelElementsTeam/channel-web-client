@@ -177,6 +177,13 @@ class ChannelPage extends Polymer.Element {
 
   // handle events from controller
 
+  onMessage(event) {
+    var detail = event.detail;
+    if (detail) {
+      this.processMessage(detail, false);
+    }
+  }
+
   onHistoryMessage(event) {
     var detail = event.detail;
     if (detail) {
@@ -198,15 +205,21 @@ class ChannelPage extends Polymer.Element {
           $service.componentManager.get(msgDetails.package).then((pkg) => {
             Polymer.importHref(this.resolveUrl(pkg.importHref), () => {
               detail.package = pkg;
-              this.insertMessage(detail, history);
+              this.insertMessage(msgDetails.cardId, detail, history);
             });
           }).catch((err) => {
             console.error("Failed to import component", err);
           });
           break;
         }
-        case '':
-          // TODO: 
+        case 'card-to-card':
+          // find card item with the spciedif id
+          const cardView = this.shadowRoot.querySelector('channel-card[@data-card="' + msgDetails.cardId + '"]');
+          if (cardView) {
+            cardView.handleCardToCardMessage(detail);
+          } else {
+            console.warn("Ignoring card-to-card message: Card with id '" + msgDetails.cardId + "' not found.");
+          }
           break;
         default:
           break;
@@ -214,8 +227,9 @@ class ChannelPage extends Polymer.Element {
     }
   }
 
-  insertMessage(detail, atTop) {
+  insertMessage(cardId, detail, atTop) {
     const itemData = {
+      cardId: cardId,
       detail: detail,
       channel: this.$.controller
     }

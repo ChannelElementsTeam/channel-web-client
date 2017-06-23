@@ -87,8 +87,7 @@ class ChannelController extends Polymer.Element {
 
   handleHistoryMessage(details, message) {
     const channelMessage = this._parseChannelMessage(message.fullPayload);
-    if (channelMessage.valid) {
-    } else {
+    if (!channelMessage.valid) {
       console.warn("Ignoring history message: ", channelMessage.errorMessage, message);
       return;
     }
@@ -104,13 +103,48 @@ class ChannelController extends Polymer.Element {
   }
 
   handleMessage(message) {
-    console.log("message", message);
-    // TOOD: 
+    const channelMessage = this._parseChannelMessage(message.fullPayload);
+    if (!channelMessage.valid) {
+      console.warn("Ignoring channel message: ", channelMessage.errorMessage, message);
+      return;
+    }
+    const participantInfo = this.participantByCode[message.senderCode];
+    const event = new CustomEvent('message', {
+      bubbles: true, composed: true, detail: {
+        message: message,
+        channelMessage: channelMessage,
+        participant: participantInfo
+      }
+    });
+    this.dispatchEvent(event);
   }
 
   handleParticipant(joined, left) {
-    console.log("participant", joined || left);
-    // TODO: 
+    if (joined) {
+      const data = {
+        participantId: joined.participantId,
+        code: joined.participantCode,
+        details: joined.participantDetails
+      }
+      this.participantByCode[joined.participantCode] = data;
+      if (!this.participantById[joined.participantId]) {
+        this.participantById[joined.participantId] = data;
+      }
+      console.log("Participant joined", this.participantById[joined.participantId]);
+      const event = new CustomEvent('participant-joined', { bubbles: true, composed: true, detail: { participant: this.participantById[joined.participantId] } });
+      this.dispatchEvent(event);
+    } else {
+      const data = this.participantById[left.participantId] || this.participantByCode[left.participantCode];
+      if (this.participantByCode[left.participantCode]) {
+        delete this.participantByCode[left.participantCode];
+      }
+      if (left.permanently) {
+        delete this.participantById[left.participantId];
+      }
+      console.log("Participant left", data);
+      const event = new CustomEvent('participant-left', { bubbles: true, composed: true, detail: { participant: data, permanently: left.permanently } });
+      this.dispatchEvent(event);
+    }
   }
 
   handleChannelDelete(notification) {
@@ -143,43 +177,15 @@ class ChannelController extends Polymer.Element {
     return deserializedCardExchangeMessage;
   }
 
-  // this.deleteChannelCallback = (notification) => {
-  //     const chid = notification.channelId;
-  //     if (this.channelInfo) {
-  //       if (chid === this.channelInfo.channelId) {
-  //         $router.goto("");
-  //       }
-  //     }
-  //     const event = new CustomEvent('refresh-channels', { bubbles: true, composed: true, detail: {} });
-  //     window.dispatchEvent(event);
-  //   };
-
-
-  // handleParticipant(joined, left) {
-  //   if (joined) {
-  //     var data = {
-  //       participantId: joined.participantId,
-  //       code: joined.participantCode,
-  //       details: joined.participantDetails
-  //     }
-  //     this.participantByCode[joined.participantCode] = data;
-  //     if (!this.participantById[joined.participantId]) {
-  //       this.participantById[joined.participantId] = data;
-  //     }
-  //   } else {
-  //     if (this.participantByCode[left.participantCode]) {
-  //       delete this.participantByCode[left.participantCode];
-  //     }
-  //     if (left.permanently) {
-  //       delete this.participantById[left.participantId];
-  //     }
-  //   }
-  // }
-
   // ChannelInfo interface methods
 
   get participants() {
-    // TODO:
+    var list = [];
+    for (var key in this.participantById) {
+      if (this.participantById.hasOwnProperty(key)) {
+        list.push(this.participantById[key]);
+      }
+    }
     return [];
   }
 

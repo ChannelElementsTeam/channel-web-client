@@ -2,15 +2,14 @@ class ChannelCard extends Polymer.Element {
   static get is() { return 'channel-card'; }
   static get properties() {
     return {
-      data: {
-        type: Object,
-        observer: 'refresh'
-      },
-      channel: {
-        type: Object,
-        observer: 'refresh'
-      }
+      data: Object,
+      channel: Object
     }
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.refresh();
   }
 
   refresh() {
@@ -24,13 +23,21 @@ class ChannelCard extends Polymer.Element {
       e.data = this.data.channelMessage.json.details.data;
       e.binary = this.data.channelMessage.binary;
       this.$.cardContainer.appendChild(e);
-      // console.log("data", this.data);
+      this.element = e;
+      console.log("data", this.data);
     }
   }
 
   clearElement(node) {
+    this.element = null;
     while (node.hasChildNodes()) {
       node.removeChild(node.lastChild);
+    }
+  }
+
+  handleCardToCardMessage(detail) {
+    if (this.element && this.element.handleCardToCardMessageReceived) {
+      this.element.handleCardToCardMessageReceived(detail.participant, this.channelMessage.json.details);
     }
   }
 }

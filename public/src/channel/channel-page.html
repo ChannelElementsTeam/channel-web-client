@@ -80,7 +80,7 @@
       <div class="flex" style="position: relative;">
         <div id="scrollPanel" class="fillContainer verticalScroll">
           <template is="dom-repeat" items="{{items}}">
-            <channel-card data="{{item.detail}}" channel="{{item.channel}}"></channel-card>
+            <channel-card data="{{item.detail}}" channel="{{item.channel}}" data-card$="{{item.cardId}}"></channel-card>
           </template>
         </div>
       </div>
@@ -107,7 +107,7 @@
         <component-picker id="picker" on-select="onComposerSelected"></component-picker>
       </div>
     </div>
-    <channel-controller id="controller" on-history-message="onHistoryMessage" on-delete="onChannelDeleted"></channel-controller>
+    <channel-controller id="controller" on-message="onMessage" on-history-message="onHistoryMessage" on-delete="onChannelDeleted"></channel-controller>
   </template>
   <script src="channel-page.js"></script>
 </dom-module>
