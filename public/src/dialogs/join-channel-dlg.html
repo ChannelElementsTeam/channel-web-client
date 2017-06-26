@@ -1,0 +1,101 @@
+<link rel="import" href="../common/x-dialog.html">
+<link rel="import" href="../common/x-button.html">
+<dom-module id="join-channel-dlg">
+  <template>
+    <style is="custom-style" include="iron-flex iron-flex-alignment">
+      .content {
+        padding: 15px;
+      }
+
+      .buttons {
+        padding: 15px;
+        margin-top: 30px;
+      }
+
+      x-button {
+        min-width: 60px;
+        text-align: center;
+        margin-left: 10px;
+      }
+
+      label {
+        display: block;
+        font-weight: 400;
+        color: #808080;
+        letter-spacing: 0.05em;
+        font-size: 18px;
+      }
+
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        outline: none;
+        padding: 5px 3px;
+        font-size: 16px;
+        border: none;
+        border-bottom: 1px solid #d8d8d8;
+        font-family: inherit;
+        font-weight: 300;
+        margin-top: 10px;
+      }
+    </style>
+    <x-dialog id="dlg" headline="Join Channel">
+      <div class="content">
+        <label>Invite code for the channel</label>
+        <input type="text" id="txtCode" placeholder="Invite code" on-input="onInput">
+        <label style="margin-top: 25px;">Your name (as seen in this channel)</label>
+        <input type="text" id="txtName" placeholder="Your name" on-input="onInput">
+        <div class="buttons horizontal layout center">
+          <div class="flex"></div>
+          <div>
+            <x-button on-click="onCancel">Cancel</x-button>
+          </div>
+          <div>
+            <x-button id="btnJoin" on-click="onJoin">Join Channel</x-button>
+          </div>
+        </div>
+      </div>
+    </x-dialog>
+  </template>
+  <script>
+    class JoinChannelDialog extends Polymer.Element {
+      static get is() { return 'join-channel-dlg'; }
+      show() {
+        this.$.txtCode.value = "";
+        this.$.txtName.value = "";
+        this.onInput();
+        this.$.dlg.show();
+      }
+      hide() {
+        this.$.dlg.hide();
+      }
+      onCancel() {
+        this.hide();
+      }
+      onInput() {
+        const code = this.$.txtCode.value.trim();
+        const name = this.$.txtName.value.trim();
+        this.$.btnJoin.disabled = !(code && name);
+      }
+      onJoin() {
+        this.hide();
+        const code = this.$.txtCode.value.trim();
+        const name = this.$.txtName.value.trim();
+        if (code && name) {
+          $channels.acceptInvitation(code, {}, { name: name }).then((channelInfo) => {
+            this.hide();
+            const event = new CustomEvent('refresh-channels', { bubbles: true, composed: true, detail: {} });
+            window.dispatchEvent(event);
+            setTimeout(() => {
+              $router.goto(['channel', channelInfo.channelUrl, channelInfo.registerUrl], channelInfo);
+            }, 500);
+          }).catch((err) => {
+            console.error("Failed to accept channel invitation: ", err);
+            this.hide();
+          });
+        }
+      }
+    }
+    window.customElements.define(JoinChannelDialog.is, JoinChannelDialog);
+  </script>
+</dom-module>

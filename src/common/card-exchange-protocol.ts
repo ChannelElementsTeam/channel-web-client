@@ -37,26 +37,27 @@ export interface ParticipantIdentity {
 }
 
 export interface ParticipantInfo {
-  identity: ParticipantIdentity;
+  details: ParticipantIdentity;
   memberSince: number;
   lastActive: number;
   isMe: boolean;
   isCreator: boolean;
 }
 
-export interface ChannelInfo extends EventTarget {  // 'channel-participant-joined', 'channel-participant-left'
+export interface ChannelInfo extends EventTarget {  // 'participant-joined', 'participant-left'
   participants: ParticipantInfo[];
-  sendCard(sender: ChannelWebComponent, data: JsonPlusBinaryMessage<any>): Promise<void>;  // for component in 'compose' mode
-  sendCardToCardMessage(sender: ChannelWebComponent, message: JsonPlusBinaryMessage<any>): Promise<void>; // for component in 'view' mode
+  sendCard(sender: ChannelWebComponent, data: JsonPlusBinaryMessage<any>, history: boolean, priority: boolean): Promise<void>;  // for component in 'compose' mode
+  sendCardToCardMessage(sender: ChannelWebComponent, message: JsonPlusBinaryMessage<any>, history: boolean, priority: boolean): Promise<void>; // for component in 'view' mode
 }
 
-export interface ParticipantEvent { // 'channel-participant-joined', 'channel-participant-left'
+export interface ParticipantEvent { // 'participant-joined', 'participant-left'
   participant: ParticipantInfo;
 }
 
 export interface ChannelWebComponent extends HTMLElement {
   // parameters
   cardId: string;
+  packageSource: string;
   mode: string;  // 'compose', 'view'
   channel: ChannelInfo; // component can add listeners
 

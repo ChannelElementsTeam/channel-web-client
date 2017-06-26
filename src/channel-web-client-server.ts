@@ -7,7 +7,7 @@ import * as fs from 'fs';
 import { db } from "./db";
 import { ComponentRequest, ComponentDescriptor, ComponentResponse } from "./common/client-requests";
 import { UserRecord } from './interfaces/db-records';
-const bower = require('bower');
+import { BowerHelper } from './bower-helper';
 
 const MAX_HISTORY_BUFFERED_SIZE = 50000;
 const USER_COOKIE_NAME = 'channel-elements-web-client-id';
@@ -17,6 +17,7 @@ export class ChannelWebClientServer {
   private shadowComponentsDirectory: string;
   private shadowComponentsPath: string;
   private baseClientUri: string;
+  private bowerHelper: BowerHelper;
 
   constructor(app: express.Application, server: net.Server, baseClientUri: string, restRelativeBaseUrl: string, shadowPublicDirectory: string, shadowPublicPath: string) {
     this.app = app;
@@ -24,6 +25,7 @@ export class ChannelWebClientServer {
     this.registerHandlers(restRelativeBaseUrl);
     this.shadowComponentsDirectory = shadowPublicDirectory + '/bower_components';
     this.shadowComponentsPath = shadowPublicPath + '/bower_components';
+    this.bowerHelper = new BowerHelper(this.shadowComponentsDirectory);
   }
 
   start(): void {
@@ -31,7 +33,7 @@ export class ChannelWebClientServer {
   }
 
   private registerHandlers(restRelativeBaseUrl: string): void {
-    this.app.get(restRelativeBaseUrl + '/component', (request: Request, response: Response) => {
+    this.app.post(restRelativeBaseUrl + '/component', (request: Request, response: Response) => {
       void this.handleComponent(request as ChannelsRequest, response);
     });
   }
@@ -68,37 +70,21 @@ export class ChannelWebClientServer {
     if (pkg.startsWith('https://github.com/') && pkg.lastIndexOf('/') > pkg.lastIndexOf('.')) {
       pkg = pkg + '.git';
     }
+
     return new Promise<void>((resolve, reject) => {
-      let pkgInfo: any;
-      console.log("Bower.install " + pkg + "...");
-      bower.commands
-        .install([pkg], { production: true, json: true }, { directory: this.shadowComponentsDirectory })
-        .on('end', (installed: any) => {
-          if (pkgInfo && pkgInfo.pkgMeta && pkgInfo.pkgMeta.name && pkgInfo.pkgMeta.main) {
-            void this.processComponent(pkgInfo, request, response).then(() => {
-              console.log("Component loaded", request.channelsContext.user.id, pkgInfo);
-              resolve();
-            }).catch((err) => {
-              console.error("Error processing component", request.channelsContext.user.id, pkgInfo, err);
-              response.status(400).send("Unable to load component: " + err.toString());
-            });
-          } else {
-            console.warn("Component appears incorrect.  Rejecting", request.channelsContext.user.id, pkgInfo);
-            response.status(400).send("Component does not appear to be correct.  pkgMeta is missing or incomplete (require at least name and main).");
-            resolve();
-          }
-        })
-        .on('error', (err: any) => {
-          console.warn("Error while loading component", request.channelsContext.user.id, err);
-          response.status(400).send("Error while loading component: " + err.toString());
+      this.bowerHelper.install(pkg).then((pkgInfo) => {
+        void this.processComponent(pkgInfo, request, response).then(() => {
+          console.log("Component loaded", request.channelsContext.user.id, pkgInfo);
           resolve();
-        })
-        .on('log', (log: any) => {
-          if (log.data && log.data.endpoint && log.data.endpoint.source === pkg) {
-            pkgInfo = log.data;
-          }
-          console.log("Bower logging:", log);
+        }).catch((err) => {
+          console.error("Error processing component", request.channelsContext.user.id, pkgInfo, err);
+          response.status(400).send("Unable to load component: " + err.toString());
+          resolve();
         });
+      }).catch ((err) => {
+        console.error(err.mesage || err);
+        resolve();
+      });
     });
   }
 
@@ -122,29 +108,10 @@ export class ChannelWebClientServer {
       };
       response.json(componentResponse);
     } catch (err) {
-      await this.uninstallComponent(pkgInfo, request, response);
+      await this.bowerHelper.uninstallComponent(pkgInfo);
       throw err;
     }
   }
-
-  private async uninstallComponent(pkgInfo: any, request: ChannelsRequest, response: Response): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      bower.commands
-        .uninstall([pkgInfo.pkgMeta.name], { json: true }, { directory: this.shadowComponentsDirectory })
-        .on('end', (installed: any) => {
-          console.error("Uninstalled component", pkgInfo);
-          resolve();
-        })
-        .on('error', (err: any) => {
-          console.error("Failure trying to uninstall a component", pkgInfo);
-          resolve();
-        })
-        .on('log', (log: any) => {
-          console.log("Bower logging while uninstalling:", log);
-        });
-    });
-  }
-
 }
 
 export interface ChannelsContext {
