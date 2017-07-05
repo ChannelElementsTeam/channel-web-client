@@ -83,6 +83,7 @@ class ClientService {
 
     this.dbService = new DbService();
     this.componentManager = new ComponentManager(this);
+    this.identityManager = new IdentityManager(this);
   }
 
   fetchComponent(packageName) {

@@ -16,8 +16,8 @@ class ChannelPage extends Polymer.Element {
 
   onActivate(route) {
     this.onDeactivate();
-    this.channelUrl = route.segments[1];
-    this.registryUrl = route.segments[2];
+    this.providerId = parseInt(route.segments[1]), 10;
+    this.channelAddress = route.segments[2];
     this.refresh(route.context);
   }
 
@@ -25,7 +25,7 @@ class ChannelPage extends Polymer.Element {
     this.setBottomDrawer(false);
     this.$.controller.detach();
     if (this.joinData) {
-      $channels.leaveChannel({ channelId: this.joinData.channelId }).then(() => { });
+      $channels.leaveChannel({ channelAddress: this.joinData.channelAddress }).then(() => { });
       this.joinData = null;
     }
   }
@@ -34,7 +34,8 @@ class ChannelPage extends Polymer.Element {
     if (info) {
       this.set("channelInfo", info);
     } else {
-      $channels.getChannel(this.registryUrl, this.channelUrl).then((response) => {
+      $channels.getChannel(this.providerId, $service.identityManager.signedAddress, this.channelAddress).then((response) => {
+        console.log("channel info", response);
         this.set("channelInfo", response);
       });
     }
@@ -64,15 +65,19 @@ class ChannelPage extends Polymer.Element {
       });
     }
     $app.setBarData({
-      title: this.channelInfo.details.name,
+      title: this.channelInfo.name,
       actions: barActions
     });
 
     this.$.controller.detach();
     // connect socket and join channel
-    console.log("Connecting to socket for channel: ", this.channelInfo.channelId);
-    $channels.connectTransport(this.channelInfo.registerUrl, this.channelInfo.channelId, this.channelInfo.transportUrl).then(() => {
-      $channels.joinChannel({ channelId: this.channelInfo.channelId }).then((joinResponse) => {
+    console.log("Connecting to socket for channel: ", this.channelInfo.channelAddress);
+    $channels.connectTransport(this.providerId, this.channelInfo.channelAddress, this.channelInfo.transportUrl).then(() => {
+      const joinRequest = {
+        channelAddress: this.channelInfo.channelAddress,
+        memberIdentity: $service.identityManager.signedAddress
+      };
+      $channels.joinChannel(joinRequest).then((joinResponse) => {
         console.log("Joined channel: ", joinResponse);
         this.set("joinData", joinResponse);
         this.enableComposeArea(true);
@@ -98,7 +103,7 @@ class ChannelPage extends Polymer.Element {
     // load history
     console.log("Fetching history");
     $channels.getHistory({
-      channelId: this.channelInfo.channelId,
+      channelAddress: this.channelInfo.channelAddress,
       before: (new Date()).getTime(),
       maxCount: 100
     }).then((response) => {
@@ -107,15 +112,14 @@ class ChannelPage extends Polymer.Element {
   }
 
   deleteChannel() {
-    $channels.deleteChannel(this.channelInfo.registerUrl, this.channelInfo.channelUrl).then(() => { });
+    $channels.deleteChannel(this.providerId, $service.identityManager.signedAddress, this.channelInfo.channelAddress).then(() => { });
   }
 
   shareChannel() {
     const shareRequest = {
-      channelId: this.channelInfo.channelId,
-      details: {}
+      channel: this.channelAddress
     };
-    $channels.shareChannel(this.channelInfo.registerUrl, shareRequest).then((shareResponse) => {
+    $channels.shareChannel(this.providerId, $service.identityManager.signedAddress, shareRequest).then((shareResponse) => {
       Polymer.importHref(this.resolveUrl("../dialogs/invite-code-dlg.html"), () => {
         this.$.dlgInvite.code = shareResponse.shareCodeUrl;
         this.$.dlgInvite.show();

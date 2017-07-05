@@ -203,8 +203,8 @@ class ChannelController extends Polymer.Element {
     this.participantById = {};
     this.participantByCode = {};
     if (this.channelInfo && this.joinData) {
-      for (var i = 0; i < this.channelInfo.recentlyActiveMembers.length; i++) {
-        let p = this.channelInfo.recentlyActiveMembers[i];
+      for (var i = 0; i < this.channelInfo.members.length; i++) {
+        let p = this.channelInfo.members[i];
         this.participantById[p.participantId] = p;
       }
       for (var i = 0; i < this.joinData.participants.length; i++) {

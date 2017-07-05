@@ -18,14 +18,14 @@ class ChannelList extends Polymer.Element {
   }
 
   refresh() {
-    $channels.listAllChannels().then((list) => {
+    $channels.listAllChannels($service.identityManager.signedAddress).then((list) => {
       this.set("list", list);
     });
   }
 
   onItemClick(event) {
     const data = event.model.item;
-    $router.goto(['channel', data.channelUrl, data.registerUrl]);
+    $router.goto(['channel', data.providerId, data.channelAddress]);
   }
 }
 window.customElements.define(ChannelList.is, ChannelList);
