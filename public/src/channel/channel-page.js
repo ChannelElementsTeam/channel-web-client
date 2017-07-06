@@ -16,12 +16,15 @@ class ChannelPage extends Polymer.Element {
 
   onActivate(route) {
     this.onDeactivate();
+    this._route = route;
+    this.setOnline(true);
     this.providerId = parseInt(route.segments[1]), 10;
     this.channelAddress = route.segments[2];
     this.refresh(route.context);
   }
 
   onDeactivate() {
+    this._route = null;
     this.setBottomDrawer(false);
     this.$.controller.detach();
     if (this.joinData) {
@@ -95,7 +98,7 @@ class ChannelPage extends Polymer.Element {
     if (!this.joinData) {
       return;
     }
-    
+
     // Attach controller
     this.$.controller.channelInfo = this.channelInfo;
     this.$.controller.joinData = this.joinData;
@@ -230,6 +233,24 @@ class ChannelPage extends Polymer.Element {
 
   onChannelDeleted() {
     $router.goto("");
+  }
+
+  onSocketConnection(event) {
+    const connected = event.detail.connected;
+    if (this._online !== connected) {
+      if (!connected) {
+        this.setOnline(false);
+      } else {
+        this.onActivate(this._route);
+      }
+    }
+  }
+
+  setOnline(online) {
+    if (this._online !== online) {
+      this._online = online;
+      this.$.offlinePanel.style.display = online ? "none" : "";
+    }
   }
 
   processMessage(detail, history) {
