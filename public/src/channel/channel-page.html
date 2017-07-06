@@ -71,6 +71,15 @@
         transition: transform 0.4s ease;
       }
 
+      #offlinePanel {
+        background: rgba(255, 255, 255, 0.7);
+        padding: 20px;
+        text-align: center;
+        font-weight: 400;
+        color: #808080;
+        letter-spacing: 0.05em;
+      }
+
       @media (max-width: 700px) {
         #bottomDrawer {
           padding: 5px 8px;
@@ -109,7 +118,11 @@
       </div>
     </div>
     <invite-code-dlg id="dlgInvite"></invite-code-dlg>
-    <channel-controller id="controller" on-message="onMessage" on-history-message="onHistoryMessage" on-delete="onChannelDeleted"></channel-controller>
+    <channel-controller id="controller" on-message="onMessage" on-history-message="onHistoryMessage" on-delete="onChannelDeleted"
+      on-socket="onSocketConnection"></channel-controller>
+    <div id="offlinePanel" class="fillContainer" style="display: none;">
+      <div>This channel is offline</div>
+    </div>
   </template>
   <script src="channel-page.js"></script>
 </dom-module>

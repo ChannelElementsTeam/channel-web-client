@@ -79,6 +79,7 @@ class ChannelsApp extends Polymer.Element {
     // scroll to the top after every page transition
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
+    this.closeMenu();
   }
 
   showMenu() {

@@ -48,6 +48,10 @@ class ChannelController extends Polymer.Element {
       $channels.removeChannelListener('delete', this.channelInfo.channelAddress, this._deleteListener);
       this._deleteListener = null;
     }
+    if (this._socketListener) {
+      $channels.removeChannelListener('socket', this.channelInfo.channelAddress, this._socketListener);
+      this._socketListener = null;
+    }
   }
 
   _attachListeners() {
@@ -61,27 +65,33 @@ class ChannelController extends Polymer.Element {
       if (this._attached) {
         this.handleHistoryMessage(details, message);
       }
-    }
+    };
     this._mesageListener = (message) => {
       if (this._attached) {
         this.handleMessage(message);
       }
-    }
+    };
     this._participantListener = (joined, left) => {
       if (this._attached) {
         this.handleParticipant(joined, left);
       }
-    }
+    };
     this._deleteListener = (notification) => {
       if (this._attached) {
         this.handleChannelDelete(notification);
       }
-    }
+    };
+    this._socketListener = (connected) => {
+      if (this._attached) {
+        this.handleSocketConnected(connected);
+      }
+    };
 
     $channels.addChannelListener("history-message", this.channelInfo.channelAddress, this._historyListener);
     $channels.addChannelListener("message", this.channelInfo.channelAddress, this._mesageListener);
     $channels.addChannelListener("participant", this.channelInfo.channelAddress, this._participantListener);
     $channels.addChannelListener("delete", this.channelInfo.channelAddress, this._deleteListener);
+    $channels.addChannelListener("socket", this.channelInfo.channelAddress, this._socketListener);
   }
 
   handleHistoryMessage(details, message) {
@@ -157,6 +167,13 @@ class ChannelController extends Polymer.Element {
     }
     const event = new CustomEvent('refresh-channels', { bubbles: true, composed: true, detail: {} });
     window.dispatchEvent(event);
+  }
+
+  handleSocketConnected(connected) {
+    const event = new CustomEvent('socket', {
+      bubbles: true, composed: true, detail: { connected: connected }
+    });
+    this.dispatchEvent(event);
   }
 
   _parseChannelMessage(payload) {
