@@ -13,8 +13,8 @@ class ChannelController extends Polymer.Element {
 
   constructor() {
     super();
-    this.participantById = {};
-    this.participantByCode = {};
+    this._participantByAddress = {};
+    this._participantByCode = {};
   }
 
   attach() {
@@ -33,19 +33,19 @@ class ChannelController extends Polymer.Element {
       return;
     }
     if (this._historyListener) {
-      $channels.removeChannelListener('history-message', this.channelInfo.channelId, this._historyListener);
+      $channels.removeChannelListener('history-message', this.channelInfo.channelAddress, this._historyListener);
       this._historyListener = null;
     }
     if (this._mesageListener) {
-      $channels.removeChannelListener('message', this.channelInfo.channelId, this._mesageListener);
+      $channels.removeChannelListener('message', this.channelInfo.channelAddress, this._mesageListener);
       this._mesageListener = null;
     }
     if (this._participantListener) {
-      $channels.removeChannelListener('participant', this.channelInfo.channelId, this._participantListener);
+      $channels.removeChannelListener('participant', this.channelInfo.channelAddress, this._participantListener);
       this._participantListener = null;
     }
     if (this._deleteListener) {
-      $channels.removeChannelListener('delete', this.channelInfo.channelId, this._deleteListener);
+      $channels.removeChannelListener('delete', this.channelInfo.channelAddress, this._deleteListener);
       this._deleteListener = null;
     }
   }
@@ -78,10 +78,10 @@ class ChannelController extends Polymer.Element {
       }
     }
 
-    $channels.addChannelListener("history-message", this.channelInfo.channelId, this._historyListener);
-    $channels.addChannelListener("message", this.channelInfo.channelId, this._mesageListener);
-    $channels.addChannelListener("participant", this.channelInfo.channelId, this._participantListener);
-    $channels.addChannelListener("delete", this.channelInfo.channelId, this._deleteListener);
+    $channels.addChannelListener("history-message", this.channelInfo.channelAddress, this._historyListener);
+    $channels.addChannelListener("message", this.channelInfo.channelAddress, this._mesageListener);
+    $channels.addChannelListener("participant", this.channelInfo.channelAddress, this._participantListener);
+    $channels.addChannelListener("delete", this.channelInfo.channelAddress, this._deleteListener);
   }
 
   handleHistoryMessage(details, message) {
@@ -90,7 +90,7 @@ class ChannelController extends Polymer.Element {
       console.warn("Ignoring history message: ", channelMessage.errorMessage, message);
       return;
     }
-    const participantInfo = this.participantById[details.participantId];
+    const participantInfo = this._participantByAddress[details.senderAddress];
     const event = new CustomEvent('history-message', {
       bubbles: true, composed: true, detail: {
         message: message,
@@ -107,7 +107,7 @@ class ChannelController extends Polymer.Element {
       console.warn("Ignoring channel message: ", channelMessage.errorMessage, message);
       return;
     }
-    const participantInfo = this.participantByCode[message.senderCode];
+    const participantInfo = this._participantByCode[message.senderCode];
     const event = new CustomEvent('message', {
       bubbles: true, composed: true, detail: {
         message: message,
@@ -121,24 +121,25 @@ class ChannelController extends Polymer.Element {
   handleParticipant(joined, left) {
     if (joined) {
       const data = {
-        participantId: joined.participantId,
-        code: joined.participantCode,
-        details: joined.participantDetails
+        identity: joined.memberIdentity,
+        code: joined.participantCode
+      };
+      const details = ChannelIdentityUtils.decode(data.identity.signature, data.identity.publicKey);
+      data.identity.details = details;
+      this._participantByCode[joined.participantCode] = data;
+      if (!this._participantByAddress[details.address]) {
+        this._participantByAddress[details.address] = data;
       }
-      this.participantByCode[joined.participantCode] = data;
-      if (!this.participantById[joined.participantId]) {
-        this.participantById[joined.participantId] = data;
-      }
-      console.log("Participant joined", this.participantById[joined.participantId]);
-      const event = new CustomEvent('participant-joined', { bubbles: true, composed: true, detail: { participant: this.participantById[joined.participantId] } });
+      console.log("Participant joined", data);
+      const event = new CustomEvent('participant-joined', { bubbles: true, composed: true, detail: { participant: data } });
       this.dispatchEvent(event);
     } else {
-      const data = this.participantById[left.participantId] || this.participantByCode[left.participantCode];
-      if (this.participantByCode[left.participantCode]) {
-        delete this.participantByCode[left.participantCode];
+      const data = this._participantByAddress[left.participantAddress] || this._participantByCode[left.participantCode];
+      if (this._participantByCode[left.participantCode]) {
+        delete this._participantByCode[left.participantCode];
       }
       if (left.permanently) {
-        delete this.participantById[left.participantId];
+        delete this._participantByAddress[left.participantAddress];
       }
       console.log("Participant left", data);
       const event = new CustomEvent('participant-left', { bubbles: true, composed: true, detail: { participant: data, permanently: left.permanently } });
@@ -148,8 +149,8 @@ class ChannelController extends Polymer.Element {
 
   handleChannelDelete(notification) {
     if (this.channelInfo) {
-      const chid = notification.channelId;
-      if (chid === this.channelInfo.channelId) {
+      const chid = notification.channelAddress;
+      if (chid === this.channelInfo.channelAddress) {
         const event = new CustomEvent('delete', { bubbles: true, composed: true, detail: notification });
         this.dispatchEvent(event);
       }
@@ -180,19 +181,22 @@ class ChannelController extends Polymer.Element {
 
   get participants() {
     var list = [];
-    for (var key in this.participantById) {
-      if (this.participantById.hasOwnProperty(key)) {
-        list.push(this.participantById[key]);
+    for (var key in this._participantByAddress) {
+      if (this._participantByAddress.hasOwnProperty(key)) {
+        list.push(this._participantByAddress[key]);
       }
     }
     return [];
   }
 
   get me() {
-    for (var key in this.participantByCode) {
-      if (this.participantByCode.hasOwnProperty(key)) {
-        let p = this.participantByCode[key];
+    for (var key in this._participantByCode) {
+      if (this._participantByCode.hasOwnProperty(key)) {
+        let p = this._participantByCode[key];
         if (p.isYou || p.isMe) {
+          if (!p.identity) {
+            p.identity = p.participantIdentity.signedIdentity;
+          }
           return p;
         }
       }
@@ -200,16 +204,22 @@ class ChannelController extends Polymer.Element {
   }
 
   onData() {
-    this.participantById = {};
-    this.participantByCode = {};
+    this._participantByAddress = {};
+    this._participantByCode = {};
     if (this.channelInfo && this.joinData) {
       for (var i = 0; i < this.channelInfo.members.length; i++) {
         let p = this.channelInfo.members[i];
-        this.participantById[p.participantId] = p;
+        const details = ChannelIdentityUtils.decode(p.identity.signature, p.identity.publicKey);
+        p.identity.details = details;
+        this._participantByAddress[details.address] = p;
       }
       for (var i = 0; i < this.joinData.participants.length; i++) {
         let p = this.joinData.participants[i];
-        this.participantByCode[p.code] = p;
+        if (!p.identity) {
+          p.identity = p.participantIdentity.signedIdentity;
+        }
+        p.identity.details = ChannelIdentityUtils.decode(p.identity.signature, p.identity.publicKey);
+        this._participantByCode[p.code] = p;
       }
     }
   }
@@ -221,7 +231,7 @@ class ChannelController extends Polymer.Element {
         reject(new Error("Ignoring new card message. Channel not joined."));
       } else {
         const message = CardUtils.addCardMessage(this.joinData.channelCode, this.joinData.participantCode, sender.packageSource, messageData, history, priority);
-        $channels.sendMessage(this.channelInfo.channelId, message).then(() => {
+        $channels.sendMessage(this.channelInfo.channelAddress, message).then(() => {
           resolve();
           const event = new CustomEvent('message', {
             bubbles: true, composed: true, detail: {
@@ -250,7 +260,7 @@ class ChannelController extends Polymer.Element {
         reject(new Error("Ignoring card message. Channel not joined."));
       } else {
         const message = CardUtils.cardToCardMessage(this.joinData.channelCode, this.joinData.participantCode, sender.cardId, messageData, history, priority);
-        $channels.sendMessage(this.channelInfo.channelId, message).then(() => {
+        $channels.sendMessage(this.channelInfo.channelAddress, message).then(() => {
           resolve();
         }).catch((err) => {
           console.error("Failed to send message: ", err);
