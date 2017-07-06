@@ -45,6 +45,8 @@
         <input type="text" id="txtCode" placeholder="Invite code" on-input="onInput">
         <label style="margin-top: 25px;">Your name (as seen in this channel)</label>
         <input type="text" id="txtName" placeholder="Your name" on-input="onInput">
+        <label style="margin-top: 25px;">Your avatar (as seen in this channel)</label>
+        <input type="text" id="txtImage" placeholder="url to your image">
         <div class="buttons horizontal layout center">
           <div class="flex"></div>
           <div>
@@ -60,9 +62,15 @@
   <script>
     class JoinChannelDialog extends Polymer.Element {
       static get is() { return 'join-channel-dlg'; }
+      constructor() {
+        super();
+        this.LOCAL_NAME = "last-name-used";
+        this.LOCAL_AVATAR = "last-avatar-used";
+      }
       show() {
         this.$.txtCode.value = "";
-        this.$.txtName.value = "";
+        this.$.txtName.value = $service.dbService.getLocal(this.LOCAL_NAME) || "";
+        this.$.txtImage.value = $service.dbService.getLocal(this.LOCAL_AVATAR) || "";
         this.onInput();
         this.$.dlg.show();
       }
@@ -81,14 +89,21 @@
         this.hide();
         const code = this.$.txtCode.value.trim();
         const name = this.$.txtName.value.trim();
+        const image = this.$.txtImage.value.trim();
         if (code && name) {
-          $channels.acceptInvitation(code, {}, { name: name }).then((channelInfo) => {
+          $service.dbService.setLocal(this.LOCAL_NAME, name);
+          if (image) {
+            $service.dbService.setLocal(this.LOCAL_AVATAR, image);
+          }
+          const identity = $service.identityManager.getSignedIdentity(name, image);
+          $channels.acceptInvitation(code, identity).then((channelInfo) => {
             this.hide();
             const event = new CustomEvent('refresh-channels', { bubbles: true, composed: true, detail: {} });
             window.dispatchEvent(event);
-            setTimeout(() => {
-              $router.goto(['channel', channelInfo.channelUrl, channelInfo.registerUrl], channelInfo);
-            }, 500);
+            console.log("Channel info", channelInfo);
+            // setTimeout(() => {
+            //   $router.goto(['channel', channelInfo.channelUrl, channelInfo.registerUrl], channelInfo);
+            // }, 500);
           }).catch((err) => {
             console.error("Failed to accept channel invitation: ", err);
             this.hide();

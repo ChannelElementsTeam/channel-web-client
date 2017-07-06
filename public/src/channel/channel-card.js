@@ -6,12 +6,9 @@ class ChannelCard extends Polymer.Element {
         type: Object,
         observer: 'refresh'
       },
+      participant: Object,
       channel: Object
     }
-  }
-
-  connectedCallback() {
-    super.connectedCallback();
   }
 
   refresh() {
@@ -26,7 +23,19 @@ class ChannelCard extends Polymer.Element {
       e.binary = this.data.channelMessage.binary;
       this.$.cardContainer.appendChild(e);
       this.element = e;
-      // console.log("data", this.data.channelMessage.json.details.data);
+
+
+      const identity = this.data.participant.identity || this.data.participant.participantIdentity.signedIdentity;
+      let _participant = this.data._participant || identity.details;
+      if (!_participant) {
+        _participant = ChannelIdentityUtils.decode(identity.signature, identity.publicKey);
+      }
+      this.set("participant", _participant);
+
+      if (!_participant) {
+        console.log("*", this.data);
+        console.log("***");
+      }
     }
   }
 
