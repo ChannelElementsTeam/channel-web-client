@@ -68,21 +68,13 @@ class CreateChannelDialog extends Polymer.Element {
       $channels.createChannel(provider, identity, details).then((channelInfo) => {
         const event = new CustomEvent('refresh-channels', { bubbles: true, composed: true, detail: {} });
         window.dispatchEvent(event);
-        console.log("Channel created", channelInfo);
+        $channels.getProviderInfo(provider).then((providerInfo) => {
+          console.log("Channel created", providerInfo, channelInfo);
+          $router.goto(['channel', providerInfo.id, channelInfo.channelAddress]);
+        });
       }).catch((err) => {
         console.error("Failed to create channel: ", err);
       });
-
-      // $channels.register(provider, {}).then((registry) => {
-      //   $channels.createChannel(registry.services.registrationUrl, {
-      //     channelDetails: { name: channel },
-      //     participantDetails: { name: name }
-      //   }).then((channelInfo) => {
-      //     const event = new CustomEvent('refresh-channels', { bubbles: true, composed: true, detail: {} });
-      //     window.dispatchEvent(event);
-      //     $router.goto(['channel', channelInfo.channelUrl, channelInfo.registerUrl], channelInfo);
-      //   });
-      // })
     }
   }
 }

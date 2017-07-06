@@ -26,6 +26,8 @@ class ChannelList extends Polymer.Element {
   onItemClick(event) {
     const data = event.model.item;
     $router.goto(['channel', data.providerId, data.channelAddress]);
+    const ce = new CustomEvent("select", { bubbles: true, composed: true, detail: data });
+    this.dispatchEvent(ce);
   }
 }
 window.customElements.define(ChannelList.is, ChannelList);
