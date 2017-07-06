@@ -40,13 +40,13 @@ export class ChannelWebClientServer {
     if (!request.channelsContext) {
       request.channelsContext = {};
     }
-    if (request.cookies[USER_COOKIE_NAME]) {
-      request.channelsContext.user = await db.findUserById(request.cookies[USER_COOKIE_NAME]);
-    }
-    if (!request.channelsContext.user) {
-      request.channelsContext.user = await db.insertUser();
-      response.cookie(USER_COOKIE_NAME, request.channelsContext.user.id, { maxAge: 1000 * 60 * 60 * 24 * 365 });
-    }
+    // if (request.cookies[USER_COOKIE_NAME]) {
+    //   request.channelsContext.user = await db.findUserById(request.cookies[USER_COOKIE_NAME]);
+    // }
+    // if (!request.channelsContext.user) {
+    //   request.channelsContext.user = await db.insertUser();
+    //   response.cookie(USER_COOKIE_NAME, request.channelsContext.user.id, { maxAge: 1000 * 60 * 60 * 24 * 365 });
+    // }
   }
 
   private async handleComponent(request: ChannelsRequest, response: Response): Promise<void> {
@@ -76,20 +76,20 @@ export class ChannelWebClientServer {
         .on('end', (installed: any) => {
           if (pkgInfo && pkgInfo.pkgMeta && pkgInfo.pkgMeta.name && pkgInfo.pkgMeta.main) {
             void this.processComponent(pkgInfo, request, response).then(() => {
-              console.log("Component loaded", request.channelsContext.user.id, pkgInfo);
+              console.log("Component loaded", pkgInfo);
               resolve();
             }).catch((err) => {
-              console.error("Error processing component", request.channelsContext.user.id, pkgInfo, err);
+              console.error("Error processing component", pkgInfo, err);
               response.status(400).send("Unable to load component: " + err.toString());
             });
           } else {
-            console.warn("Component appears incorrect.  Rejecting", request.channelsContext.user.id, pkgInfo);
+            console.warn("Component appears incorrect.  Rejecting", pkgInfo);
             response.status(400).send("Component does not appear to be correct.  pkgMeta is missing or incomplete (require at least name and main).");
             resolve();
           }
         })
         .on('error', (err: any) => {
-          console.warn("Error while loading component", request.channelsContext.user.id, err);
+          console.warn("Error while loading component", err);
           response.status(400).send("Error while loading component: " + err.toString());
           resolve();
         })
