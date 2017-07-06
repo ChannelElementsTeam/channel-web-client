@@ -67,8 +67,8 @@
         this.LOCAL_NAME = "last-name-used";
         this.LOCAL_AVATAR = "last-avatar-used";
       }
-      show() {
-        this.$.txtCode.value = "";
+      show(code) {
+        this.$.txtCode.value = code || "";
         this.$.txtName.value = $service.dbService.getLocal(this.LOCAL_NAME) || "";
         this.$.txtImage.value = $service.dbService.getLocal(this.LOCAL_AVATAR) || "";
         this.onInput();
