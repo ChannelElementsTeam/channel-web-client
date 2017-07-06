@@ -92,6 +92,10 @@ class ChannelPage extends Polymer.Element {
     if (!this.channelInfo) {
       return;
     }
+    if (!this.joinData) {
+      return;
+    }
+    
     // Attach controller
     this.$.controller.channelInfo = this.channelInfo;
     this.$.controller.joinData = this.joinData;
