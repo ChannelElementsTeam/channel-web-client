@@ -1,0 +1,28 @@
+<dom-module id="channel-card">
+  <template>
+    <style is="custom-style" include="iron-flex iron-flex-alignment">
+      .container {
+        padding: 5px 15px;
+        font-size: 16px;
+      }
+
+      .user {
+        font-size: 14px;
+        font-weight: bold;
+        color: #263238;
+        padding-right: 8px;
+        letter-spacing: 0.05em;
+        line-height: 22px;
+      }
+    </style>
+    <div class="container horizontal layout">
+      <div class="user">
+        <span>{{participant.name}}</span>:
+      </div>
+      <div class="flex">
+        <div id="cardContainer"></div>
+      </div>
+    </div>
+  </template>
+  <script src="channel-card.js"></script>
+</dom-module>

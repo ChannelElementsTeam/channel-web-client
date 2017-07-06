@@ -18,7 +18,7 @@ import { RestServer } from './interfaces/rest-server';
 import { UrlManager } from './url-manager';
 import { rootPageHandler } from './page-handlers/root-handler';
 
-const VERSION = 2;
+const VERSION = 3;
 
 class ChannelElementsWebClient {
   private app: express.Application;

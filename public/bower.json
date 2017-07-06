@@ -3,7 +3,7 @@
   "description": "A sample web client for Channel Elements",
   "main": "index.html",
   "dependencies": {
-    "polymer": "Polymer/polymer#^2.0.0",
+    "polymer": "^2.0.1",
     "channels-web-client-lib": "ChannelElementsTeam/channels-web-client-lib",
     "iron-flex-layout": "^2.0.0",
     "iron-icon": "^2.0.0",

@@ -2,6 +2,7 @@
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../bower_components/polymer/lib/elements/dom-repeat.html">
 <link rel="import" href="channels-icons.html">
+<link rel="import" href="core/core.html">
 
 <dom-module id="channels-app">
   <template>
@@ -159,7 +160,6 @@
             <div>
               <home-page id="home" class="page home" data-href="home/home-page.html"></home-page>
               <channel-page class="channel page" data-href="channel/channel-page.html"></channel-page>
-              <channel-accept-invite-page class="join-channel page" data-href="channel/channel-accept-invite-page.html"></channel-accept-invite-page>
             </div>
           </div>
         </div>
@@ -167,7 +167,6 @@
       </div>
     </div>
   </template>
-  <script src="../bower_components/channels-web-client-lib/channels-web-client-lib.js"></script>
   <script src="hash-router.js"></script>
   <script src="channels-app.js"></script>
 </dom-module>

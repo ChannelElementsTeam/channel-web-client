@@ -1,0 +1,135 @@
+<link rel="import" href="../common/x-button.html">
+
+<dom-module id="component-picker">
+  <template>
+    <style is="custom-style" include="iron-flex iron-flex-alignment">
+      .item {
+        background: #f0f0f0;
+        padding: 10px;
+        margin: 5px 5px 5px 0;
+        border-radius: 10px;
+        box-shadow: 1px 1px 4px -1px rgba(0, 0, 0, 0.3);
+        max-width: 200px;
+        line-height: 1.3em;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .item:hover {
+        background: rgba(0, 0, 200, 0.1);
+      }
+
+      .btn {
+        border: 1px dashed;
+        background: white;
+        box-shadow: none;
+        margin: 5px 0 5px 5px;
+        white-space: nowrap;
+        font-size: 15px;
+        font-weight: 400;
+        color: #555;
+        letter-spacing: 0.05em;
+      }
+
+      x-button {
+        font-size: 15px;
+        letter-spacing: 0.05em;
+      }
+
+      .name {
+        font-size: 14px;
+        font-weight: 400;
+        color: #555;
+        letter-spacing: 0.05em;
+      }
+
+      .description {
+        font-size: 13px;
+        padding-top: 5px;
+        height: 41px;
+        overflow: hidden;
+        position: relative;
+        color: #808080;
+      }
+
+      #container {
+        position: relative;
+      }
+
+      .fillContainer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        overflow: hidden;
+      }
+
+      #importPanel,
+      #loadingPanel {
+        background: white;
+      }
+
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        outline: none;
+        padding: 5px 3px;
+        font-size: 16px;
+        border: none;
+        border-bottom: 1px solid #d8d8d8;
+        font-family: inherit;
+        font-weight: 300;
+        margin-top: 10px;
+      }
+
+      .buttonCell {
+        padding-left: 15px;
+      }
+
+      @media (max-width: 700px) {
+        .item {
+          margin: 3px 3px 3px 0;
+          max-width: 125px;
+          border-radius: 5px;
+        }
+        .btn {
+          max-width: 200px;
+          margin: 5px 0 5px 5px;
+        }
+        .buttonCell {
+          padding-left: 8px;
+        }
+      }
+    </style>
+    <div id="container" class="horizontal layout wrap">
+      <template is="dom-repeat" items="{{items}}">
+        <div class="item" on-click="onItemClick">
+          <div class="name">{{item.package.name}}</div>
+          <div class="description">{{item.package.description}}</div>
+        </div>
+      </template>
+      <div class="item horizontal layout center btn" on-click="onImport">
+        <div>+ Import a component</div>
+      </div>
+      <div id="importPanel" class="fillContainer vertical layout" style="display: none;">
+        <div class="flex"></div>
+        <div class="horizontal layout center">
+          <div class="flex">
+            <input id="txtUrl" type="text" on-input="onInput" placeholder="Enter package name">
+          </div>
+          <div class="buttonCell">
+            <x-button id="btnImport" on-click="onSubmit">Import</x-button>
+          </div>
+        </div>
+        <div class="flex"></div>
+      </div>
+      <div id="loadingPanel" class="fillContainer vertical layout" style="display: none;">
+        <div class="flex"></div>
+        <div>Importing package...</div>
+        <div class="flex"></div>
+      </div>
+    </div>
+  </template>
+  <script src="component-picker.js"></script>
+</dom-module>

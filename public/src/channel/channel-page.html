@@ -1,6 +1,8 @@
 <link rel="import" href="../../bower_components/polymer/lib/elements/dom-repeat.html">
-<link rel="import" href="../chat/chat-compose.html">
-<link rel="import" href="../chat/chat-message.html">
+<link rel="import" href="../common/card-utils.html">
+<link rel="import" href="../core/channel-controller.html">
+<link rel="import" href="channel-card.html">
+<link rel="import" href="../components/component-picker.html">
 
 <dom-module id="channel-page">
   <template>
@@ -23,86 +25,91 @@
       .composeArea {
         border-top: 1px solid #e5e5e5;
         position: relative;
-      }
-
-      #scrollPanel {
-        background: white;
-      }
-
-      #composeGlass {
-        background: white;
-        opacity: 1;
-        transition: opacity 0.3s ease;
-      }
-
-      #sharePanel {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
         padding: 10px;
-        background: #263238;
-        color: white;
-        box-shadow: 0 5px 5px -1px rgba(0, 0, 0, 0.4);
-        font-size: 15px;
+      }
+
+      .appsCell {
+        padding-right: 10px;
       }
 
       iron-icon {
+        color: #2a3138;
+      }
+
+      .icon-button {
         cursor: pointer;
+        --iron-icon-height: 38px;
+        --iron-icon-width: 38px;
         padding: 7px;
         border-radius: 50%;
         transition: all 0.2s ease;
       }
 
-      iron-icon:hover {
-        background: rgba(255, 255, 255, 0.1);
+      .icon-button:hover {
+        background: rgba(0, 0, 200, 0.1);
       }
 
-      input {
-        outline: none;
-        display: block;
-        width: 100%;
-        box-sizing: border-box;
-        border: none;
-        padding: 4px;
-        background: rgba(255, 255, 255, 0.2);
-        color: white;
-        font-family: inherit;
-        font-size: 13px;
-        font-weight: 300;
+      #btnCloseDrawer {
+        --iron-icon-height: 32px;
+        --iron-icon-width: 32px;
       }
 
-      .codeLabel {
-        padding-right: 10px;
-        text-transform: uppercase;
-        font-size: 14px;
-        letter-spacing: 0.05em;
+      #glassPane {
+        background: rgba(0, 0, 0, 0);
+        transition: background 0.5s ease;
+      }
+
+      #bottomDrawer {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 10px 20px 15px;
+        background: white;
+        box-shadow: 0 -3px 5px -1px rgba(0, 0, 0, 0.3);
+        transform: translateY(110%);
+        transition: transform 0.4s ease;
+      }
+
+      @media (max-width: 700px) {
+        #bottomDrawer {
+          padding: 5px 8px;
+        }
       }
     </style>
     <div class="fillContainer vertical layout">
       <div class="flex" style="position: relative;">
         <div id="scrollPanel" class="fillContainer verticalScroll">
-          <div>
-            <template is="dom-repeat" items="{{items}}">
-              <chat-message data="{{item}}"></chat-message>
-            </template>
+          <template is="dom-repeat" items="{{items}}">
+            <channel-card data="{{item.detail}}" channel="{{item.channel}}" data-card$="{{item.cardId}}"></channel-card>
+          </template>
+        </div>
+      </div>
+      <div id="composeArea" class="composeArea horizontal layout center">
+        <div class="appsCell">
+          <iron-icon class="icon-button" icon="chnls:apps" on-click="onComponents"></iron-icon>
+        </div>
+        <div id="noComposer" class="flex">
+          <label on-click="onComponents">
+            <iron-icon icon="chnls:arrow-back"></iron-icon>
+            <span>Tap here to pick a composer</span>
+          </label>
+        </div>
+        <div id="composerPanel" class="flex" style="display: none;"></div>
+      </div>
+      <div id="glassPane" class="fillContainer" style="display: none;" on-click="onCancelDrawer"></div>
+      <div id="bottomDrawer" style="display: none;">
+        <div class="horizontal layout center" style="margin-bottom: 10px;">
+          <div class="flex" style="font-size: 20px; font-weight: 400;">Select a component</div>
+          <div style="padding-left: 5px;">
+            <iron-icon id="btnCloseDrawer" class="icon-button" icon="chnls:close" on-click="onCancelDrawer"></iron-icon>
           </div>
         </div>
-      </div>
-      <div class="composeArea">
-        <chat-compose id="compose" on-compose="onCompose"></chat-compose>
-        <div id="composeGlass" class="fillContainer"></div>
-      </div>
-      <div id="sharePanel" class="horizontal layout center" style="display: none;">
-        <div class="codeLabel">Invite code:</div>
-        <div class="flex">
-          <input id="txtCode">
-        </div>
-        <div style="padding-left: 5px;">
-          <iron-icon icon="chnls:close" on-click="hideSharePanel"></iron-icon>
-        </div>
+        <component-picker id="picker" on-select="onComposerSelected"></component-picker>
       </div>
     </div>
+    <invite-code-dlg id="dlgInvite"></invite-code-dlg>
+    <channel-controller id="controller" on-message="onMessage" on-history-message="onHistoryMessage" on-delete="onChannelDeleted"></channel-controller>
   </template>
   <script src="channel-page.js"></script>
 </dom-module>
