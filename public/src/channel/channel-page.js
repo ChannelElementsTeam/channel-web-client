@@ -26,7 +26,7 @@ class ChannelPage extends Polymer.Element {
   onDeactivate() {
     this._route = null;
     this.setBottomDrawer(false);
-    this.$.controller.detach();
+    this.$.controller.delegate.detach();
     if (this.joinData) {
       $channels.leaveChannel({ channelAddress: this.joinData.channelAddress }).then(() => { });
       this.joinData = null;
@@ -72,7 +72,7 @@ class ChannelPage extends Polymer.Element {
       actions: barActions
     });
 
-    this.$.controller.detach();
+    this.$.controller.delegate.detach();
     // connect socket and join channel
     console.log("Connecting to socket for channel: ", this.channelInfo.channelAddress);
     $channels.connectTransport(this.providerId, this.channelInfo.channelAddress, this.channelInfo.transportUrl).then(() => {
@@ -100,9 +100,9 @@ class ChannelPage extends Polymer.Element {
     }
 
     // Attach controller
-    this.$.controller.channelInfo = this.channelInfo;
-    this.$.controller.joinData = this.joinData;
-    this.$.controller.attach();
+    this.$.controller.delegate.channelInfo = this.channelInfo;
+    this.$.controller.delegate.joinData = this.joinData;
+    this.$.controller.delegate.attach();
 
     // Clear view
     this.set("items", []);
@@ -186,7 +186,7 @@ class ChannelPage extends Polymer.Element {
     var e = document.createElement(pkg.channelComponent.composerTag);
     e.packageSource = pkg.source;
     e.mode = "compose";
-    e.channel = this.$.controller;
+    e.channel = this.$.controller.delegate;
     this.currentComposeElement = e;
 
     this.$.composerPanel.appendChild(e);
@@ -289,7 +289,7 @@ class ChannelPage extends Polymer.Element {
     const itemData = {
       cardId: cardId,
       detail: detail,
-      channel: this.$.controller
+      channel: this.$.controller.delegate
     }
     if (atTop) {
       this.unshift('items', itemData);

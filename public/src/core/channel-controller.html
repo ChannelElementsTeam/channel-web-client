@@ -1,3 +1,12 @@
 <dom-module id="channel-controller">
-  <script src="channel-controller.js"></script>
+  <script>
+    class ChannelControllerElement extends Polymer.Element {
+      static get is() { return "channel-controller" }
+      constructor() {
+        super();
+        this.delegate = new ChannelController($channels, this);
+      }
+    }
+    window.customElements.define(ChannelControllerElement.is, ChannelControllerElement);
+  </script>
 </dom-module>
