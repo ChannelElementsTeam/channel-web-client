@@ -248,8 +248,8 @@ class ChannelController extends Polymer.Element {
         reject(new Error("Ignoring new card message. Channel not joined."));
       } else {
         const message = CardUtils.addCardMessage(this.joinData.channelCode, this.joinData.participantCode, sender.packageSource, messageData, history, priority);
-        $channels.sendMessage(this.channelInfo.channelAddress, message).then(() => {
-          resolve();
+        $channels.sendMessage(this.channelInfo.channelAddress, message).then((sentMessage) => {
+          resolve(sentMessage);
           const event = new CustomEvent('message', {
             bubbles: true, composed: true, detail: {
               message: message,
@@ -277,8 +277,8 @@ class ChannelController extends Polymer.Element {
         reject(new Error("Ignoring card message. Channel not joined."));
       } else {
         const message = CardUtils.cardToCardMessage(this.joinData.channelCode, this.joinData.participantCode, sender.cardId, messageData, history, priority);
-        $channels.sendMessage(this.channelInfo.channelAddress, message).then(() => {
-          resolve();
+        $channels.sendMessage(this.channelInfo.channelAddress, message).then((sentMessage) => {
+          resolve(sentMessage);
         }).catch((err) => {
           console.error("Failed to send message: ", err);
           reject(err);
