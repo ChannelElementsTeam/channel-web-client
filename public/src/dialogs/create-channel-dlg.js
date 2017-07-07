@@ -9,7 +9,7 @@ class CreateChannelDialog extends Polymer.Element {
   }
 
   show() {
-    this.$.txtProvider.value = $service.dbService.getLocal(this.LOCAL_PROVIDER) || "";
+    this.$.txtProvider.value = $service.dbService.getLocal(this.LOCAL_PROVIDER) || "https://channelelements.com/channel-elements.json";
     this.$.txtChannel.value = "";
     this.$.txtName.value = $service.dbService.getLocal(this.LOCAL_NAME) || "";
     this.$.txtImage.value = $service.dbService.getLocal(this.LOCAL_AVATAR) || "";
