@@ -17,7 +17,7 @@ export class BowerHelper {
           if (pkgInfo && pkgInfo.pkgMeta && pkgInfo.pkgMeta.name && pkgInfo.pkgMeta.main) {
             resolve(pkgInfo);
           } else {
-            if (pkgInfo.endpoint && pkgInfo.resolver) {
+            if (pkgInfo && pkgInfo.endpoint && pkgInfo.resolver) {
               void this.info(pkgInfo.resolver.source).then((meta) => {
                 if (meta) {
                   pkgInfo.pkgMeta = meta;
@@ -38,7 +38,7 @@ export class BowerHelper {
           reject(new Error("Error while loading component: " + err.toString()));
         })
         .on('log', (log: any) => {
-          if (log.data && log.data.endpoint && log.data.endpoint.source === pkg) {
+          if (log.data && log.data.endpoint && log.data.endpoint.source === pkg.split('#')[0]) {
             pkgInfo = log.data;
           }
           console.log("Bower logging:", log);
