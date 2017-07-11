@@ -1,4 +1,6 @@
 <link rel="import" href="../common/x-card.html">
+<link rel="import" href="../core/channel-controller.html">
+<!--<link rel="import" href="channel-card.html">-->
 
 <dom-module id="channel-feed-item">
   <template>
@@ -8,7 +10,7 @@
       }
 
       section {
-        margin: 20px 0;
+        margin: 0;
         border-radius: 2px;
         overflow: hidden;
         border-bottom: 1px solid #e5e5e5;
@@ -36,14 +38,18 @@
         letter-spacing: 0.05em;
       }
     </style>
-    <section>
-      <div class="header horizontal layout center">
-        <div class="name flex">{{channel.name}}</div>
-        <div class="timestamp">{{channel.lastUpdated}}</div>
-      </div>
-      <div class="content">
-      </div>
-    </section>
+    <x-card>
+      <section>
+        <div class="header horizontal layout center">
+          <div class="name flex">{{channel.name}}</div>
+          <div class="timestamp">{{channel.lastUpdated}}</div>
+        </div>
+        <div class="content">
+        </div>
+      </section>
+    </x-card>
+    <channel-controller id="controller" on-message="onMessage" on-history-message="onHistoryMessage" on-delete="onChannelDeleted"
+      on-socket="onSocketConnection"></channel-controller>
   </template>
   <script src="channel-feed-item.js"></script>
 </dom-module>
