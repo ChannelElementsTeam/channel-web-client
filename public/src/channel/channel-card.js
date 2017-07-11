@@ -6,6 +6,7 @@ class ChannelCard extends Polymer.Element {
         type: Object,
         observer: 'refresh'
       },
+      pending: Array,
       participant: Object,
       channel: Object
     }
@@ -33,9 +34,20 @@ class ChannelCard extends Polymer.Element {
       this.set("participant", _participant);
 
       if (!_participant) {
-        console.log("*", this.data);
+        console.log("*** Warning: No participant in card data: ", this.data);
         console.log("***");
       }
+      requestAnimationFrame(() => {
+        if (this.pending && this.pending.length) {
+          this.pending.sort((a, b) => {
+            return a.message.timestamp = b.message.timestamp;
+          });
+          for (var i = 0; i < this.pending.length; i++) {
+            this.handleCardToCardMessage(this.pending[i]);
+          }
+        }
+        this.pending = [];
+      });
     }
   }
 
@@ -48,7 +60,7 @@ class ChannelCard extends Polymer.Element {
 
   handleCardToCardMessage(detail) {
     if (this.element && this.element.handleCardToCardMessageReceived) {
-      this.element.handleCardToCardMessageReceived(detail.participant, detail.channelMessage);
+      this.element.handleCardToCardMessageReceived(detail.participant, detail.channelMessage, detail.message);
     }
   }
 }

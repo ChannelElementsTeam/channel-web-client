@@ -14,6 +14,11 @@ class ChannelPage extends Polymer.Element {
     }
   }
 
+  constructor() {
+    super();
+    this._pendingCardMessages = {};
+  }
+
   onActivate(route) {
     this.onDeactivate();
     this._route = route;
@@ -27,6 +32,7 @@ class ChannelPage extends Polymer.Element {
     this._route = null;
     this.setBottomDrawer(false);
     this.$.controller.delegate.detach();
+    this._pendingCardMessages = {};
     if (this.joinData) {
       $channels.leaveChannel({ channelAddress: this.joinData.channelAddress }).then(() => { });
       this.joinData = null;
@@ -109,6 +115,7 @@ class ChannelPage extends Polymer.Element {
 
     // load history
     console.log("Fetching history");
+    this._pendingCardMessages = {};
     $channels.getHistory({
       channelAddress: this.channelInfo.channelAddress,
       before: (new Date()).getTime(),
@@ -276,7 +283,10 @@ class ChannelPage extends Polymer.Element {
           if (cardView) {
             cardView.handleCardToCardMessage(detail);
           } else {
-            console.warn("Ignoring card-to-card message: Card with id '" + msgDetails.cardId + "' not found.");
+            if (!this._pendingCardMessages[msgDetails.cardId]) {
+              this._pendingCardMessages[msgDetails.cardId] = [];
+            }
+            this._pendingCardMessages[msgDetails.cardId].push(detail);
           }
           break;
         default:
@@ -290,6 +300,10 @@ class ChannelPage extends Polymer.Element {
       cardId: cardId,
       detail: detail,
       channel: this.$.controller.delegate
+    }
+    if (this._pendingCardMessages[cardId]) {
+      itemData.pendingCardMessages = this._pendingCardMessages[cardId];
+      delete this._pendingCardMessages[cardId];
     }
     if (atTop) {
       this.unshift('items', itemData);

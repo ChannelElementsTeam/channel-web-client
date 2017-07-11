@@ -66,6 +66,7 @@ export interface ChannelWebComponent extends HTMLElement {
   binary?: Uint8Array;
 
   // methods:  view-mode only
-  handleCardToCardMessageReceived(sender: ParticipantInfo, details: CardToCardMessageDetails): void; // view mode only
+  // rawMessage is 'ChannelMessage' as defined in channels-common
+  handleCardToCardMessageReceived(sender: ParticipantInfo, details: CardToCardMessageDetails, rawMessage: any): void; // view mode only
 }
 // Component fires:  'resize' when it has unilaterally changed its own size (e.g., based on a message received)
