@@ -1,0 +1,19 @@
+<link rel="import" href="../../bower_components/polymer/lib/elements/dom-repeat.html">
+<link rel="import" href="channel-feed-item.html">
+
+<dom-module id="feed-page">
+  <template>
+    <style is="custom-style" include="iron-flex iron-flex-alignment">
+      .container {
+        max-width: 700px;
+        margin: 20px auto;
+      }
+    </style>
+    <div class="container vertical layout">
+      <template is="dom-repeat" items="{{channels}}">
+        <channel-feed-item data-address$="{{item.channelAddress}}" channel="{{item}}"></channel-feed-item>
+      </template>
+    </div>
+  </template>
+  <script src="feed-page.js"></script>
+</dom-module>
