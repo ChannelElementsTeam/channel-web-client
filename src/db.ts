@@ -29,6 +29,17 @@ export class Database {
   private async initializeBowerManagement(): Promise<void> {
     this.bowerManagement = this.db.collection('bowerManagement');
     await this.bowerManagement.createIndex({ id: 1 }, { unique: true });
+    try {
+      const record: BowerManagementRecord = {
+        id: 'main',
+        serverId: null,
+        status: 'available',
+        timestamp: Date.now()
+      };
+      await this.bowerManagement.insert(record);
+    } catch (_) {
+      // noop
+    }
   }
 
   async insertUser(): Promise<UserRecord> {
@@ -46,9 +57,8 @@ export class Database {
     return await this.users.findOne<UserRecord>({ id: id });
   }
 
-  async upsertBowerManagement(id: string, serverId: string, status: string, timestamp: number, whereStatus?: string, whereTimestamp?: number): Promise<boolean> {
-    const record: BowerManagementRecord = {
-      id: id,
+  async updateBowerManagement(id: string, serverId: string, status: string, timestamp: number, whereStatus?: string, whereTimestamp?: number): Promise<boolean> {
+    const update: any = {
       serverId: serverId,
       status: status,
       timestamp: timestamp
@@ -57,13 +67,13 @@ export class Database {
       id: id
     };
     if (whereStatus) {
-      query.whereStatus = whereStatus;
+      query.status = whereStatus;
     }
     if (typeof whereTimestamp === 'number') {
-      query.whereTimestamp = whereTimestamp;
+      query.timestamp = whereTimestamp;
     }
-    const writeResult = await this.bowerManagement.updateOne(query, record, { upsert: true });
-    return writeResult.upsertedCount === 1 || writeResult.modifiedCount === 1;
+    const writeResult = await this.bowerManagement.updateOne(query, { $set: update });
+    return writeResult.modifiedCount === 1;
   }
 
   async findBowerManagement(id: string): Promise<BowerManagementRecord> {

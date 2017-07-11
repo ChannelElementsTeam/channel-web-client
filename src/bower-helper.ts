@@ -51,13 +51,13 @@ export class BowerHelper {
       if (bowerManagement && bowerManagement.status === 'busy') {
         if (Date.now() - bowerManagement.timestamp > 1000 * 90) {
           console.warn("BowerHelper: encountered stale bower lock.  Forcing.", description);
-          await db.upsertBowerManagement('main', serverId, 'busy', Date.now());
+          await db.updateBowerManagement('main', serverId, 'busy', Date.now());
           break;
         }
         console.log("BowerHelper: waiting while another process is busy", description);
         await Utils.sleep(1000);
       } else {
-        if (await db.upsertBowerManagement('main', serverId, 'busy', Date.now(), bowerManagement ? bowerManagement.status : null, bowerManagement ? bowerManagement.timestamp : null)) {
+        if (await db.updateBowerManagement('main', serverId, 'busy', Date.now(), bowerManagement ? bowerManagement.status : null, bowerManagement ? bowerManagement.timestamp : null)) {
           break;
         } else {
           console.warn("BowerHelper: collision trying to get lock. Waiting then trying again", description);
@@ -70,7 +70,7 @@ export class BowerHelper {
   }
 
   private async unlockBower(): Promise<void> {
-    await db.upsertBowerManagement('main', configuration.get('serverId'), 'available', Date.now());
+    await db.updateBowerManagement('main', configuration.get('serverId'), 'available', Date.now());
     console.log("BowerHelper: Lock released");
   }
 
