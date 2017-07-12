@@ -7,7 +7,8 @@
     "channels-web-client-lib": "ChannelElementsTeam/channels-web-client-lib",
     "iron-flex-layout": "^2.0.0",
     "iron-icon": "^2.0.0",
-    "iron-iconset-svg": "^2.0.0"
+    "iron-iconset-svg": "^2.0.0",
+    "moment": "^2.18.1"
   },
   "devDependencies": {
     "web-component-tester": "Polymer/web-component-tester#^6.0.0",

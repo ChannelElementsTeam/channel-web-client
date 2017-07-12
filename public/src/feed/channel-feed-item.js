@@ -32,6 +32,7 @@ class ChannelFeedItem extends Polymer.Element {
   refresh() {
     this.$.controller.delegate.detach();
     if (this.channel) {
+      this.set("channel.timeDisplay", this.friendlyTime(this.channel.lastUpdated));
       $channels.connectTransport(this.channel.providerId, this.channel.channelAddress, this.channel.transportUrl).then(() => {
         const joinRequest = {
           channelAddress: this.channel.channelAddress,
@@ -44,6 +45,16 @@ class ChannelFeedItem extends Polymer.Element {
         console.error(err);
       });
     }
+  }
+
+  friendlyTime(time) {
+    return moment(time).calendar(null, {
+      sameDay: 'h:mm a',
+      nextDay: '[Tomorrow]',
+      nextWeek: 'dddd',
+      lastWeek: '[Last] dddd',
+      sameElse: 'M/D/YYYY'
+    });
   }
 
   onChannelJoined() {
