@@ -1,6 +1,6 @@
 <link rel="import" href="../common/x-card.html">
 <link rel="import" href="../core/channel-controller.html">
-<!--<link rel="import" href="channel-card.html">-->
+<link rel="import" href="../channel/channel-card.html">
 
 <dom-module id="channel-feed-item">
   <template>
@@ -22,7 +22,8 @@
       }
 
       .content {
-        min-height: 50px;
+        min-height: 10px;
+        pointer-events: none;
       }
 
       .name {
@@ -45,6 +46,7 @@
           <div class="timestamp">{{channel.lastUpdated}}</div>
         </div>
         <div class="content">
+          <channel-card id="card" channel="{{itemData.channel}}" pending="{{itemData.pendingCardMessages}}" data="{{itemData.detail}}"></channel-card>
         </div>
       </section>
     </x-card>
