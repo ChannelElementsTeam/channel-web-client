@@ -10,7 +10,9 @@ class ChannelPage extends Polymer.Element {
       joinData: {
         type: Object,
         observer: 'onChannelJoined'
-      }
+      },
+      pinnedData: Object,
+      pinnedCard: String
     }
   }
 
@@ -315,6 +317,26 @@ class ChannelPage extends Polymer.Element {
       this.push('items', itemData);
     }
     // TODO: not efficient because shit renders list again when bound
+  }
+
+  onItemPin(event) {
+    const pin = event.detail.pin;
+    const cardId = event.model.item.cardId;
+    if (!pin) {
+      event.target.classList.remove("pinnedCard");
+      event.target.pinned = false;
+      this.pinnedCard = null;
+      this.$.spacer.style.height = "0";
+    } else {
+      if (this.pinnedCard) {
+        this.pinnedCard.classList.remove("pinnedCard");
+        this.pinnedCard.pinned = false;
+      }
+      this.pinnedCard = event.target;
+      this.pinnedCard.classList.add("pinnedCard");
+      this.pinnedCard.pinned = true;
+      this.$.spacer.style.height = (this.pinnedCard.offsetHeight * 1.5) + "px";
+    }
   }
 }
 window.customElements.define(ChannelPage.is, ChannelPage);

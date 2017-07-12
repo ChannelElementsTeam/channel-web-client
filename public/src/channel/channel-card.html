@@ -2,7 +2,7 @@
   <template>
     <style is="custom-style" include="iron-flex iron-flex-alignment">
       .container {
-        padding: 5px 15px;
+        padding: 5px 15px 5px 0;
         font-size: 16px;
       }
 
@@ -14,10 +14,35 @@
         letter-spacing: 0.05em;
         line-height: 22px;
       }
+
+      iron-icon {
+        margin-left: -5px;
+        transform: translateX(4px) translateY(-1px);
+        color: #808080;
+        opacity: 0;
+        transition: all 0.2s ease;
+        display: none;
+      }
+
+      .pinnable iron-icon {
+        display: inline-block;
+        cursor: pointer;
+      }
+
+      .pinnable:hover iron-icon {
+        opacity: 1;
+      }
+
+      .pinnable.pinned iron-icon {
+        opacity: 1;
+      }
     </style>
     <div class="container horizontal layout">
       <div class="user">
-        <span>{{participant.name}}</span>:
+        <label class$="{{userClass}}">
+          <iron-icon id="pin" icon="{{pinIcon}}" title$="{{pinTitle}}" on-click="togglePin"></iron-icon>
+          <span>{{participant.name}}</span>:
+        </label>
       </div>
       <div class="flex">
         <div id="cardContainer"></div>

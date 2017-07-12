@@ -8,7 +8,26 @@ class ChannelCard extends Polymer.Element {
       },
       pending: Array,
       participant: Object,
-      channel: Object
+      channel: Object,
+      userClass: {
+        type: String,
+        value: "pinnable"
+      },
+      pinIcon: {
+        type: String,
+        value: "chnls:vertical-align-top"
+      },
+      pinnable: {
+        type: Boolean,
+        value: true,
+        observer: 'pinnableChanged'
+      },
+      pinned: {
+        type: Boolean,
+        value: false,
+        observer: 'pinnedChange'
+      },
+      pinTitle: String
     }
   }
 
@@ -62,6 +81,22 @@ class ChannelCard extends Polymer.Element {
     if (this.element && this.element.handleCardToCardMessageReceived) {
       this.element.handleCardToCardMessageReceived(detail.participant, detail.channelMessage, detail.message);
     }
+  }
+
+  pinnableChanged() {
+    const style = this.pinnable ? (this.pinned ? "pinnable pinned" : "pinnable") : "";
+    this.set("userClass", style);
+  }
+
+  pinnedChange() {
+    this.set("pinTitle", this.pinned ? "Unpin" : "Pin to the top");
+    this.set("pinIcon", this.pinned ? "chnls:vertical-align-bottom" : "chnls:vertical-align-top")
+    this.pinnableChanged();
+  }
+
+  togglePin() {
+    const event = new CustomEvent("pin", { bubbles: true, composed: true, detail: { pin: !this.pinned, data: this.data } });
+    this.dispatchEvent(event);
   }
 }
 window.customElements.define(ChannelCard.is, ChannelCard);

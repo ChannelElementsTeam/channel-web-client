@@ -79,6 +79,16 @@
         letter-spacing: 0.05em;
       }
 
+      .pinnedCard {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: #fff;
+        padding: 5px;
+        box-shadow: 0 2px 3px -1px rgba(0, 0, 0, 0.3);
+      }
+
       @media (max-width: 700px) {
         #bottomDrawer {
           padding: 5px 8px;
@@ -88,8 +98,10 @@
     <div class="fillContainer vertical layout">
       <div class="flex" style="position: relative;">
         <div id="scrollPanel" class="fillContainer verticalScroll">
+          <div id="spacer"></div>
           <template is="dom-repeat" items="{{items}}">
-            <channel-card data="{{item.detail}}" channel="{{item.channel}}" pending="{{item.pendingCardMessages}}" data-card$="{{item.cardId}}"></channel-card>
+            <channel-card data="{{item.detail}}" channel="{{item.channel}}" pending="{{item.pendingCardMessages}}" data-card$="{{item.cardId}}"
+              on-pin="onItemPin"></channel-card>
           </template>
         </div>
       </div>
