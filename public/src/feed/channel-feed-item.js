@@ -107,6 +107,9 @@ class ChannelFeedItem extends Polymer.Element {
         case 'card-to-card':
           if (this.currentCardId && this.currentCardId === msgDetails.cardId) {
             this.$.card.handleCardToCardMessage(detail);
+            if (detail.message.history) {
+              this._fireUpdated(detail.message.timestamp);
+            }
           } else {
             if (!this._pendingCardMessages[msgDetails.cardId]) {
               this._pendingCardMessages[msgDetails.cardId] = [];
@@ -140,11 +143,17 @@ class ChannelFeedItem extends Polymer.Element {
             delete this._pendingCardMessages[cardId];
           }
           this.set("itemData", itemData);
+          this._fireUpdated(detail.message.timestamp);
         });
       }).catch((err) => {
         console.error("Failed to import component", err);
       });
     }
+  }
+
+  _fireUpdated(timestamp) {
+    const event = new CustomEvent("update", { bubbles: true, composed: true, detail: { timestamp: timestamp } });
+    this.dispatchEvent(event);
   }
 }
 window.customElements.define(ChannelFeedItem.is, ChannelFeedItem);
