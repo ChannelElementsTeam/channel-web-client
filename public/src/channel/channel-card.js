@@ -6,7 +6,10 @@ class ChannelCard extends Polymer.Element {
         type: Object,
         observer: 'refresh'
       },
-      pending: Array,
+      pending: {
+        type: Array,
+        notify: true,
+      },
       participant: Object,
       channel: Object,
       userClass: {
@@ -65,7 +68,7 @@ class ChannelCard extends Polymer.Element {
             this.handleCardToCardMessage(this.pending[i]);
           }
         }
-        this.pending = [];
+        this.set("pending", []);
       });
     }
   }
