@@ -172,12 +172,16 @@ class ChannelPage extends Polymer.Element {
 
   onComposerSelected(event) {
     this.setBottomDrawer(false);
-    var pkg = event.detail;
-    if (pkg && pkg.importHref) {
-      Polymer.importHref(this.resolveUrl(pkg.importHref), () => {
-        this.switchToComposer(pkg);
-      });
-    }
+    var detail = event.detail;
+    $service.componentManager.get(detail.source).then((pkg) => {
+      if (pkg && pkg.importHref) {
+        Polymer.importHref(this.resolveUrl(pkg.importHref), () => {
+          this.switchToComposer(pkg);
+        });
+      }
+    }).catch((err) => {
+      console.error("Failed to import component", err);
+    });
   }
 
   clearElement(node) {

@@ -1,16 +1,21 @@
 class ComponentManager {
   constructor(service) {
     this.service = service;
+    this.loadedPackages = {};
   }
 
   get(packageName, forceFetch) {
     return new Promise((resolve, reject) => {
       const doFetch = () => {
         this._fetchComponent(packageName).then((response) => {
+          this.loadedPackages[packageName] = true;
           this.service.dbService.saveComponent(response).then(() => { });
           resolve(response);
         });
       };
+      if (!this.loadedPackages[packageName]) {
+        forceFetch = true;
+      }
       if (forceFetch) {
         doFetch();
         return;

@@ -1,6 +1,6 @@
 <link rel="import" href="../common/x-card.html">
 <link rel="import" href="../core/channel-controller.html">
-<!--<link rel="import" href="channel-card.html">-->
+<link rel="import" href="../channel/channel-card.html">
 
 <dom-module id="channel-feed-item">
   <template>
@@ -19,10 +19,13 @@
       .header {
         background: #f8f8f8;
         padding: 10px;
+        cursor: pointer;
       }
 
       .content {
-        min-height: 50px;
+        min-height: 10px;
+        pointer-events: none;
+        padding: 10px 0;
       }
 
       .name {
@@ -34,22 +37,25 @@
 
       .timestamp {
         color: #808080;
-        font-size: 14px;
+        font-size: 12px;
         letter-spacing: 0.05em;
+        font-weight: 400;
       }
     </style>
     <x-card>
       <section>
         <div class="header horizontal layout center">
           <div class="name flex">{{channel.name}}</div>
-          <div class="timestamp">{{channel.lastUpdated}}</div>
+          <div class="timestamp">{{channel.timeDisplay}}</div>
         </div>
         <div class="content">
+          <channel-card id="card" channel="{{itemData.channel}}" pending="{{itemData.pendingCardMessages}}" data="{{itemData.detail}}"></channel-card>
         </div>
       </section>
     </x-card>
     <channel-controller id="controller" on-message="onMessage" on-history-message="onHistoryMessage" on-delete="onChannelDeleted"
       on-socket="onSocketConnection"></channel-controller>
   </template>
+  <script src="../../bower_components/moment/moment.js"></script>
   <script src="channel-feed-item.js"></script>
 </dom-module>

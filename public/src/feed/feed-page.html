@@ -11,9 +11,11 @@
     </style>
     <div class="container vertical layout">
       <template is="dom-repeat" items="{{channels}}">
-        <channel-feed-item data-address$="{{item.channelAddress}}" channel="{{item}}"></channel-feed-item>
+        <channel-feed-item data-address$="{{item.channelAddress}}" channel="{{item}}" on-click="onItemClick"></channel-feed-item>
       </template>
     </div>
+    <create-channel-dlg id="dlgCreate"></create-channel-dlg>
+    <join-channel-dlg id="dlgJoin"></join-channel-dlg>
   </template>
   <script src="feed-page.js"></script>
 </dom-module>

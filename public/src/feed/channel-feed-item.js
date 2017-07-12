@@ -9,13 +9,20 @@ class ChannelFeedItem extends Polymer.Element {
       joinData: {
         type: Object,
         observer: 'onChannelJoined'
-      }
+      },
+      itemData: Object
     };
+  }
+
+  constructor() {
+    super();
+    this._pendingCardMessages = {};
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     this.$.controller.delegate.detach();
+    this._pendingCardMessages = {};
     if (this.joinData) {
       $channels.leaveChannel({ channelAddress: this.joinData.channelAddress }).then(() => { });
       this.joinData = null;
@@ -25,6 +32,7 @@ class ChannelFeedItem extends Polymer.Element {
   refresh() {
     this.$.controller.delegate.detach();
     if (this.channel) {
+      this.set("channel.timeDisplay", this.friendlyTime(this.channel.lastUpdated));
       $channels.connectTransport(this.channel.providerId, this.channel.channelAddress, this.channel.transportUrl).then(() => {
         const joinRequest = {
           channelAddress: this.channel.channelAddress,
@@ -37,6 +45,16 @@ class ChannelFeedItem extends Polymer.Element {
         console.error(err);
       });
     }
+  }
+
+  friendlyTime(time) {
+    return moment(time).calendar(null, {
+      sameDay: 'h:mm a',
+      nextDay: '[Tomorrow]',
+      nextWeek: 'dddd',
+      lastWeek: '[Last] dddd',
+      sameElse: 'M/D/YYYY'
+    });
   }
 
   onChannelJoined() {
@@ -52,12 +70,13 @@ class ChannelFeedItem extends Polymer.Element {
     this.$.controller.delegate.joinData = this.joinData;
     this.$.controller.delegate.attach();
 
+    this._pendingCardMessages = {};
     $channels.getHistory({
       channelAddress: this.channel.channelAddress,
       before: (new Date()).getTime(),
       maxCount: 10
     }).then((response) => {
-      console.log("History: ", response);
+      // console.log("History: ", response);
     });
   }
 
@@ -82,10 +101,49 @@ class ChannelFeedItem extends Polymer.Element {
       const msgDetails = msg.details;
       switch (msg.type) {
         case 'add-card': {
-          console.log("Add card", detail);
+          this._replaceCardIfNeeded(detail);
           break;
         }
+        case 'card-to-card':
+          if (this.currentCardId && this.currentCardId === msgDetails.cardId) {
+            this.$.card.handleCardToCardMessage(detail);
+          } else {
+            if (!this._pendingCardMessages[msgDetails.cardId]) {
+              this._pendingCardMessages[msgDetails.cardId] = [];
+            }
+            this._pendingCardMessages[msgDetails.cardId].push(detail);
+          }
+          break;
+        default:
+          break;
       }
+    }
+  }
+
+  _replaceCardIfNeeded(detail) {
+    let replace = (!this.currentCard) || (detail.message.timestamp >= this.currentCard.message.timestamp);
+    if (replace) {
+      this.currentCard = detail;
+      const msgDetails = detail.channelMessage.json.details;
+      const cardId = msgDetails.cardId;
+      this.currentCardId = cardId;
+      $service.componentManager.get(msgDetails.package).then((pkg) => {
+        Polymer.importHref(this.resolveUrl(pkg.importHref), () => {
+          detail.package = pkg;
+          const itemData = {
+            cardId: cardId,
+            detail: detail,
+            channel: this.$.controller.delegate
+          }
+          if (this._pendingCardMessages[cardId]) {
+            itemData.pendingCardMessages = this._pendingCardMessages[cardId];
+            delete this._pendingCardMessages[cardId];
+          }
+          this.set("itemData", itemData);
+        });
+      }).catch((err) => {
+        console.error("Failed to import component", err);
+      });
     }
   }
 }
