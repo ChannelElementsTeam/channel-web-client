@@ -1,8 +1,9 @@
 class DbService {
   constructor() {
     this.DB_NAME = "channels-client-db";
-    this.DB_VERSION = 1;
+    this.DB_VERSION = 2;
     this.STORE_COMPONENTS = "components";
+    this.STORE_PINNED = "pinnedcards";
     this.MODE_READWRITE = "readwrite";
     this.MODE_READ = "readonly";
     this.db = null;
@@ -28,9 +29,12 @@ class DbService {
         db.onerror = (event) => {
           console.log("Failed to load database: ", event);
         };
-        if (!event.oldVersion) {
+        if (!db.objectStoreNames.contains(this.STORE_COMPONENTS)) {
           const store = db.createObjectStore(this.STORE_COMPONENTS, { keyPath: "packageName" });
           store.createIndex("source", "source", { unique: true });
+        }
+        if (!db.objectStoreNames.contains(this.STORE_PINNED)) {
+          const store = db.createObjectStore(this.STORE_PINNED, { keyPath: "channel" });
         }
       };
     });
@@ -77,6 +81,45 @@ class DbService {
         };
         request.onsuccess = (event) => {
           resolve(request.result);
+        };
+      });
+    });
+  }
+
+  savePinnedCards(channel, cardList) {
+    return this.open().then(() => {
+      return new Promise((resolve, reject) => {
+        const store = this.getStore(this.STORE_PINNED, this.MODE_READWRITE);
+        try {
+          const request = store.put({
+            channel: channel,
+            cardList: cardList
+          });
+          request.onerror = (event) => {
+            console.error("Error saving pinned card list to db: ", event);
+            reject(new Error("Error saving pinned card list: " + event));
+          };
+          request.onsuccess = (event) => {
+            resolve();
+          };
+        } catch (ex) {
+          reject(ex);
+        }
+      });
+    });
+  }
+
+  getPinnedCards(channel) {
+    return this.open().then(() => {
+      return new Promise((resolve, reject) => {
+        const store = this.getStore(this.STORE_PINNED, this.MODE_READ);
+        const request = store.get(channel);
+        request.onerror = (event) => {
+          console.error("Failed to load pinned cards from DB: ", event);
+          reject(new Error("Failed to load pinned cards: " + event));
+        };
+        request.onsuccess = (event) => {
+          resolve(request.result ? (request.result.cardList || []) : []);
         };
       });
     });

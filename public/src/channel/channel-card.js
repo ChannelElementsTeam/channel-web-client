@@ -30,6 +30,10 @@ class ChannelCard extends Polymer.Element {
         value: false,
         observer: 'pinnedChange'
       },
+      pinOnLoad: {
+        type: Boolean,
+        value: false
+      },
       pinTitle: String
     }
   }
@@ -46,7 +50,6 @@ class ChannelCard extends Polymer.Element {
       e.binary = this.data.channelMessage.binary;
       this.$.cardContainer.appendChild(e);
       this.element = e;
-
 
       const identity = this.data.participant.identity || this.data.participant.participantIdentity.signedIdentity;
       let _participant = this.data._participant || identity.details;
@@ -69,6 +72,10 @@ class ChannelCard extends Polymer.Element {
           }
         }
         this.set("pending", []);
+
+        if (this.pinOnLoad !== this.pinned) {
+          this.togglePin();
+        }
       });
     }
   }

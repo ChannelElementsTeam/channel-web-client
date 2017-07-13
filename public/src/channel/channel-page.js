@@ -19,6 +19,7 @@ class ChannelPage extends Polymer.Element {
   constructor() {
     super();
     this._pendingCardMessages = {};
+    this._pendingPinnedCard = null;
   }
 
   onActivate(route) {
@@ -115,15 +116,27 @@ class ChannelPage extends Polymer.Element {
     // Clear view
     this.set("items", []);
 
-    // load history
-    console.log("Fetching history");
-    this._pendingCardMessages = {};
-    $channels.getHistory({
-      channelAddress: this.channelInfo.channelAddress,
-      before: (new Date()).getTime(),
-      maxCount: 100
-    }).then((response) => {
-      console.log("History: ", response);
+    const loadHistory = () => {
+      // load history
+      console.log("Fetching history");
+      this._pendingCardMessages = {};
+      $channels.getHistory({
+        channelAddress: this.channelInfo.channelAddress,
+        before: (new Date()).getTime(),
+        maxCount: 100
+      }).then((response) => {
+        console.log("History: ", response);
+      });
+    };
+
+    this._pendingPinnedCard = null;
+    $service.dbService.getPinnedCards(this.channelInfo.channelAddress).then((cardList) => {
+      if (cardList && cardList.length) {
+        this._pendingPinnedCard = cardList[cardList.length - 1];
+      }
+      loadHistory();
+    }).catch(() => {
+      loadHistory();
     });
   }
 
@@ -305,7 +318,8 @@ class ChannelPage extends Polymer.Element {
     const itemData = {
       cardId: cardId,
       detail: detail,
-      channel: this.$.controller.delegate
+      channel: this.$.controller.delegate,
+      pinOnLoad: (cardId === this._pendingPinnedCard)
     }
     if (this._pendingCardMessages[cardId]) {
       itemData.pendingCardMessages = this._pendingCardMessages[cardId];
@@ -337,6 +351,8 @@ class ChannelPage extends Polymer.Element {
       this.pinnedCard.pinned = true;
       this.$.spacer.style.height = (this.pinnedCard.offsetHeight * 1.5) + "px";
     }
+    const cardList = pin ? [cardId] : [];
+    $service.dbService.savePinnedCards(this.channelInfo.channelAddress, cardList).then(() => { });
   }
 }
 window.customElements.define(ChannelPage.is, ChannelPage);
