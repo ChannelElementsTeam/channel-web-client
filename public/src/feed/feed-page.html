@@ -11,7 +11,8 @@
     </style>
     <div class="container vertical layout">
       <template is="dom-repeat" items="{{channels}}">
-        <channel-feed-item data-address$="{{item.channelAddress}}" channel="{{item}}" on-click="onItemClick"></channel-feed-item>
+        <channel-feed-item data-address$="{{item.channelAddress}}" style$="{{getItemStyle(item)}}" channel="{{item}}" on-click="onItemClick"
+          on-update="onItemUpdate"></channel-feed-item>
       </template>
     </div>
     <create-channel-dlg id="dlgCreate"></create-channel-dlg>

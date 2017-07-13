@@ -34,6 +34,11 @@ class FeedPage extends Polymer.Element {
   refreshChannels() {
     this.set("channels", []);
     $channels.listAllChannels($service.identityManager.signedAddress).then((list) => {
+      if (list && list.length) {
+        for (let i = 0; i < list.length; i++) {
+          list[i]._order = i;
+        }
+      }
       this.set("channels", list);
       console.log("channels: ", list);
     }).catch((err) => {
@@ -41,9 +46,36 @@ class FeedPage extends Polymer.Element {
     });
   }
 
+  getItemStyle(item) {
+    return "order: " + item._order + ";";
+  }
+
   onItemClick(event) {
     const data = event.model.item;
     $router.goto(['channel', data.providerId, data.channelAddress]);
+  }
+
+  onItemUpdate(event) {
+    for (let i = 0; i < this.channels.length; i++) {
+      const c = this.channels[i];
+      if (c.channelAddress === event.model.item.channelAddress) {
+        c.lastUpdated = event.detail.timestamp;
+        break;
+      }
+    }
+    this.channels.sort((a, b) => {
+      return b.lastUpdated - a.lastUpdated;
+    });
+    for (let i = 0; i < this.channels.length; i++) {
+      const c = this.channels[i];
+      if (c._order != i) {
+        c._order = i;
+        const cardView = this.shadowRoot.querySelector('channel-feed-item[data-address="' + c.channelAddress + '"]');
+        if (cardView) {
+          cardView.style = this.getItemStyle(c);
+        }
+      }
+    }
   }
 
   onCreate() {
