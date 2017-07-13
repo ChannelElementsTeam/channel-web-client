@@ -76,6 +76,9 @@ class ChannelCard extends Polymer.Element {
         if (this.pinOnLoad !== this.pinned) {
           this.togglePin();
         }
+
+        const event = new CustomEvent("render", { bubbles: false, composed: true });
+        this.dispatchEvent(event);
       });
     }
   }
@@ -105,7 +108,7 @@ class ChannelCard extends Polymer.Element {
   }
 
   togglePin() {
-    const event = new CustomEvent("pin", { bubbles: true, composed: true, detail: { pin: !this.pinned, data: this.data } });
+    const event = new CustomEvent("pin", { bubbles: false, composed: true, detail: { pin: !this.pinned, data: this.data } });
     this.dispatchEvent(event);
   }
 }

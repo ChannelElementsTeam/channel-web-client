@@ -111,7 +111,7 @@
           <div id="spacer"></div>
           <template is="dom-repeat" items="{{items}}">
             <channel-card pin-on-load="{{item.pinOnLoad}}" data="{{item.detail}}" channel="{{item.channel}}" pending="{{item.pendingCardMessages}}"
-              data-card$="{{item.cardId}}" on-pin="onItemPin"></channel-card>
+              data-card$="{{item.cardId}}" on-pin="onItemPin" on-render="onItemRender"></channel-card>
           </template>
         </div>
       </div>

@@ -354,5 +354,18 @@ class ChannelPage extends Polymer.Element {
     const cardList = pin ? [cardId] : [];
     $service.dbService.savePinnedCards(this.channelInfo.channelAddress, cardList).then(() => { });
   }
+
+  onItemRender(event) {
+    if (event.model.index === (this.items.length - 1)) {
+      this.scrollToBottom();
+    }
+  }
+
+  scrollToBottom() {
+    setTimeout(() => {
+      this.$.scrollPanel.scrollTop = this.$.scrollPanel.scrollHeight;
+    }, 100);
+    this.$.scrollPanel.scrollTop = this.$.scrollPanel.scrollHeight;
+  }
 }
 window.customElements.define(ChannelPage.is, ChannelPage);
