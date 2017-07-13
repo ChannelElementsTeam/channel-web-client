@@ -10,3 +10,5 @@ shadow-public/bower_components
 # OS metadata
 .DS_Store
 Thumbs.db
+shadow-public
+npm-debug.log

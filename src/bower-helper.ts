@@ -2,6 +2,9 @@ import { db } from "./db";
 import { Utils } from "./utils";
 import { configuration } from "./configuration";
 import * as LRU from 'lru-cache';
+import * as fs from 'fs';
+import * as inquirer from 'inquirer';
+const remove = require('remove');
 
 const bower = require('bower');
 
@@ -26,15 +29,34 @@ export class BowerHelper {
   }
 
   async install(pkg: string): Promise<any> {
-    const cached = this.packageCache.get(pkg);
-    if (cached && cached.installed) {
-      return cached.pkgInfo;
+    const parts = pkg.trim().split('#');
+    const packageName = parts[0];
+    const suffix = parts.length > 1 ? parts[1] : null;
+    if (suffix && suffix !== 'update' && suffix !== '__clean' && suffix !== '__updateall') {
+      throw new Error("Invalid package suffix " + suffix);
     }
     await this.lockBower("Installing " + pkg);
     try {
-      const pkgInfo = await this.installInternal(pkg);
+      if (suffix && suffix === '__clean') {
+        await this.clean();
+      }
+      await this.ensureInit();
+      if (suffix === '__updateall') {
+        await this.updateAll();
+      }
+      const cached = this.packageCache.get(packageName);
+      if (cached && cached.installed && (!suffix || suffix !== 'update')) {
+        return cached.pkgInfo;
+      }
+      let pkgInfo = await this.installInternal(packageName);
+      if (suffix && suffix === 'update') {
+        await this.updatePackage(packageName);
+        pkgInfo = await this.installInternal(packageName);
+      }
       this.packageCache.set(pkg, { installed: true, at: Date.now(), pkgInfo: pkgInfo });
       return pkgInfo;
+    } catch (err) {
+      console.error("Bower: install failed", err);
     } finally {
       await this.unlockBower();
     }
@@ -51,10 +73,13 @@ export class BowerHelper {
       if (bowerManagement && bowerManagement.status === 'busy') {
         if (Date.now() - bowerManagement.timestamp > 1000 * 90) {
           console.warn("BowerHelper: encountered stale bower lock.  Forcing.", description);
-          await db.updateBowerManagement('main', serverId, 'busy', Date.now());
-          break;
+          if (await db.updateBowerManagement('main', serverId, 'busy', Date.now(), bowerManagement ? bowerManagement.status : null, bowerManagement ? bowerManagement.timestamp : null)) {
+            break;
+          }
+          console.log("BowerHelper: Someone jumped ahead.  Waiting again...", description);
+        } else {
+          console.warn("BowerHelper: Busy ... waiting ...", description);
         }
-        console.log("BowerHelper: waiting while another process is busy", description);
         await Utils.sleep(1000);
       } else {
         if (await db.updateBowerManagement('main', serverId, 'busy', Date.now(), bowerManagement ? bowerManagement.status : null, bowerManagement ? bowerManagement.timestamp : null)) {
@@ -79,7 +104,7 @@ export class BowerHelper {
       let pkgInfo: any;
       console.log("Bower.install " + pkg + "...");
       bower.commands
-        .install([pkg], { production: true, json: true }, { directory: this.shadowComponentsDirectory })
+        .install([pkg], { "force-latest": true, save: true, production: true, json: true }, { cwd: this.shadowComponentsDirectory })
         .on('end', (installed: any) => {
           if (pkgInfo && pkgInfo.pkgMeta && pkgInfo.pkgMeta.name && pkgInfo.pkgMeta.main) {
             resolve(pkgInfo);
@@ -153,7 +178,7 @@ export class BowerHelper {
   private async uninstallComponentInternal(pkgInfo: any): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       bower.commands
-        .uninstall([pkgInfo.pkgMeta.name], { json: true }, { directory: this.shadowComponentsDirectory })
+        .uninstall([pkgInfo.pkgMeta.name], { json: true }, { cwd: this.shadowComponentsDirectory })
         .on('end', (installed: any) => {
           console.error("Uninstalled component", pkgInfo);
           resolve();
@@ -164,6 +189,88 @@ export class BowerHelper {
         })
         .on('log', (log: any) => {
           console.log("Bower logging while uninstalling:", log);
+        });
+    });
+  }
+
+  private async ensureInit(): Promise<void> {
+    if (fs.existsSync(this.shadowComponentsDirectory + '/bower.json')) {
+      return;
+    }
+    console.log("Bower: initializing new bower.json...");
+    return new Promise<void>((resolve, reject) => {
+      bower.commands
+        .init({ interactive: true, cwd: this.shadowComponentsDirectory })
+        .on('prompt', (prompts: inquirer.Question[], callback: (answers: inquirer.Answers) => void) => {
+          // Using all default responses
+          const answers: inquirer.Answers = {};
+          for (const prompt of prompts) {
+            answers[prompt.name] = prompt.default ? prompt.default : '';
+          }
+          callback(answers);
+        })
+        .on('end', (result: any) => {
+          console.log("Bower:  completed bower init", result);
+          resolve();
+        })
+        .on('error', (err: any) => {
+          console.error("Failure trying to bower init", err);
+          resolve();
+        })
+        .on('log', (log: any) => {
+          console.log("Bower logging while init:", log);
+        });
+    });
+  }
+
+  private async clean(): Promise<void> {
+    console.log("Bower: clearing out any existing contents...");
+    return new Promise<void>((resolve, reject) => {
+      remove(this.shadowComponentsDirectory + "/", (err: any) => {
+        if (err) {
+          reject(err);
+        } else {
+          console.log("Bower: clear complete");
+          resolve();
+        }
+      });
+    });
+  }
+
+  private async updateAll(): Promise<void> {
+    console.log("Bower: updating all existing...");
+    return new Promise<void>((resolve, reject) => {
+      bower.commands
+        .update([], { json: true, production: true, save: true, "force-latest": true }, { cwd: this.shadowComponentsDirectory })
+        .on('end', (installed: any) => {
+          console.error("Bower: Update all completed");
+          resolve();
+        })
+        .on('error', (err: any) => {
+          console.error("Bower: Failure updating all");
+          resolve();
+        })
+        .on('log', (log: any) => {
+          console.log("Bower: Logging while updating all:", log);
+        });
+    });
+  }
+
+  private async updatePackage(name: string): Promise<void> {
+    console.log("Bower: updating package " + name + " ...");
+    return new Promise<void>((resolve, reject) => {
+      bower.commands
+        .update([name], { json: true, production: true, save: true, "force-latest": true }, { cwd: this.shadowComponentsDirectory })
+        .on('end', (installed: any) => {
+          console.error("Bower: Update package completed");
+          resolve();
+        })
+        .on('error', (err: any) => {
+          console.error("Bower: Failure updating package");
+          resolve();
+        })
+        .on('log', (log: any) => {
+          console.log("Bower: Logging while updating package:", log);
         });
     });
   }
