@@ -8,7 +8,7 @@ class ChannelCard extends Polymer.Element {
       },
       pending: {
         type: Array,
-        notify: true,
+        notify: false,
       },
       participant: Object,
       channel: Object,

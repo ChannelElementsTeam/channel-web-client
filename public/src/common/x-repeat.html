@@ -1,0 +1,135 @@
+<script>
+  class XRepeat extends Polymer.OptionalMutableData(Polymer.Element) {
+    static get is() { return 'x-repeat'; }
+    static get properties() {
+      return {
+        items: { type: Array },
+        as: {
+          type: String,
+          value: 'item'
+        },
+        indexAs: {
+          type: String,
+          value: 'index'
+        },
+        itemsIndexAs: {
+          type: String,
+          value: 'itemsIndex'
+        }
+      }
+    }
+    static get observers() {
+      return ['_itemsChanged(items.*)']
+    }
+
+    constructor() {
+      super();
+      this._instaceCreator = null;
+      this._rawTemplate = null;
+      this._instances = [];
+    }
+
+    disconnectedCallback() {
+      super.disconnectedCallback();
+    }
+
+    connectedCallback() {
+      super.connectedCallback();
+    }
+
+    _ensureTemplate() {
+      if (!this._instaceCreator) {
+        let template = this._rawTemplate = this.querySelector('template');
+        if (template) {
+          let instanceProps = {};
+          instanceProps[this.as] = true;
+          instanceProps[this.indexAs] = true;
+          instanceProps[this.itemsIndexAs] = true;
+          this._instaceCreator = Polymer.Templatize.templatize(template, this, {
+            mutableData: this.mutableData,
+            parentModel: true,
+            instanceProps: instanceProps
+          });
+        } else {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    _itemsChanged(change) {
+      if (this.items && !Array.isArray(this.items)) {
+        console.warn('dom-repeat expected array for `items`, found', this.items);
+      }
+      this._processChange(change);
+    }
+
+    _processChange(change) {
+      if (!this._ensureTemplate()) {
+        return;
+      }
+      if (change.path === "items.splices") {
+        const splices = change.value.indexSplices;
+        if (splices) {
+          for (const splice of splices) {
+            if (splice.addedCount > 0) {
+              this._addNodes(splice.index, splice.addedCount);
+            }
+            if (splice.removed && splice.removed.length) {
+              this._removeNodesWithData(splice.removed);
+            }
+          }
+        }
+      } else if (change.path === "items") {
+        this._clearInstances();
+        const newItems = change.value || [];
+        this._addNodes(0, newItems.length);
+      }
+    }
+
+    _addNodes(ix, count) {
+      for (let i = 0; i < count; i++) {
+        const index = ix + i;
+        const inst = this._stamp(this.items[index], index, index);
+        const insertIndex = (inst.children ? inst.children.length : 0) * index;
+        this.insertBefore(inst.root, this.children[insertIndex]);
+        this.items[index].__inst__ = inst;
+        this._instances.push(inst);
+      }
+    }
+
+    _removeNodesWithData(data) {
+      if (data && data.length) {
+        for (const d of data) {
+          if (d.__inst__) {
+            this._removeInstance(d.__inst__);
+          }
+        }
+      }
+    }
+
+    _removeInstance(inst) {
+      for (let i = 0; i < inst.children.length; i++) {
+        let el = inst.children[i];
+        inst.root.appendChild(el);
+      }
+    }
+
+    _clearInstances() {
+      for (let i = 0; i < this._instances.length; i++) {
+        this._removeInstance(this._instances[i]);
+      }
+      this._instances = [];
+    }
+
+    _stamp(item, instIdx, itemIdx) {
+      let model = {};
+      model[this.as] = item;
+      model[this.indexAs] = instIdx;
+      model[this.itemsIndexAs] = itemIdx;
+      return new this._instaceCreator(model);
+    }
+  }
+  window.customElements.define(XRepeat.is, XRepeat);
+
+</script>

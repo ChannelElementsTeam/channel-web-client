@@ -2,6 +2,7 @@
 <link rel="import" href="../core/channel-controller.html">
 <link rel="import" href="channel-card.html">
 <link rel="import" href="../components/component-picker.html">
+<link rel="import" href="../common/x-repeat.html">
 
 <dom-module id="channel-page">
   <template>
@@ -109,10 +110,16 @@
       <div class="flex" style="position: relative;">
         <div id="scrollPanel" class="fillContainer verticalScroll">
           <div id="spacer"></div>
-          <template is="dom-repeat" items="{{items}}">
+          <x-repeat items="{{items}}">
+            <template>
+              <channel-card pin-on-load="{{item.pinOnLoad}}" data="{{item.detail}}" channel="{{item.channel}}" pending="{{item.pendingCardMessages}}"
+                data-card$="{{item.cardId}}" on-pin="onItemPin" on-render="onItemRender"></channel-card>
+            </template>
+          </x-repeat>
+          <!-- <template is="dom-repeat" items="{{items}}">
             <channel-card pin-on-load="{{item.pinOnLoad}}" data="{{item.detail}}" channel="{{item.channel}}" pending="{{item.pendingCardMessages}}"
               data-card$="{{item.cardId}}" on-pin="onItemPin" on-render="onItemRender"></channel-card>
-          </template>
+          </template> -->
         </div>
       </div>
       <div id="composeArea" class="composeArea horizontal layout center">
