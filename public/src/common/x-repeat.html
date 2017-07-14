@@ -50,6 +50,9 @@
             parentModel: true,
             instanceProps: instanceProps
           });
+          if (template.parentNode) {
+            template.parentNode.removeChild(template);
+          }
         } else {
           return false;
         }
@@ -73,7 +76,7 @@
         if (splices) {
           for (const splice of splices) {
             if (splice.addedCount > 0) {
-              this._addNodes(splice.index, splice.addedCount);
+              this._addNodes(splice.index, splice.addedCount, splice.object);
             }
             if (splice.removed && splice.removed.length) {
               this._removeNodesWithData(splice.removed);
@@ -83,19 +86,20 @@
       } else if (change.path === "items") {
         this._clearInstances();
         const newItems = change.value || [];
-        this._addNodes(0, newItems.length);
+        this._addNodes(0, newItems.length, this.items);
       }
     }
 
-    _addNodes(ix, count) {
+    _addNodes(ix, count, object) {
       for (let i = 0; i < count; i++) {
         const index = ix + i;
-        const inst = this._stamp(this.items[index], index, index);
-        const insertIndex = (inst.children ? inst.children.length : 0) * index;
+        const inst = this._stamp(object[index], index, index);
+        const insertIndex = index; //(inst.children ? inst.children.length : 0) * index;
         this.insertBefore(inst.root, this.children[insertIndex]);
-        this.items[index].__inst__ = inst;
+        object[index].__inst__ = inst;
         this._instances.push(inst);
       }
+      Polymer.flush();
     }
 
     _removeNodesWithData(data) {

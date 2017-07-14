@@ -60,7 +60,6 @@ class ChannelCard extends Polymer.Element {
 
       if (!_participant) {
         console.log("*** Warning: No participant in card data: ", this.data);
-        console.log("***");
       }
       requestAnimationFrame(() => {
         if (this.pending && this.pending.length) {
