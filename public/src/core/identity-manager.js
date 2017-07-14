@@ -4,7 +4,6 @@ class IdentityManager {
     this.KEY_ME = "identity-me";
     this.keyInfo = null;
     this.privateKey = null;
-    this._signedAddress = null;
   }
 
   _me() {
@@ -20,17 +19,13 @@ class IdentityManager {
     }
     if (!this.keyInfo) {
       this.keyInfo = ChannelIdentityUtils.getKeyInfo(this.privateKey);
-      this._signedAddress = null;
     }
     return this.keyInfo;
   }
 
   get signedAddress() {
-    if (!this._signedAddress) {
-      const keyInfo = this._me();
-      this._signedAddress = ChannelIdentityUtils.createSignedAddressIdentity(keyInfo, keyInfo.address);
-    }
-    return this._signedAddress;
+    const keyInfo = this._me();
+    return ChannelIdentityUtils.createSignedAddressIdentity(keyInfo, keyInfo.address);
   }
 
   getSignedIdentity(name, image) {
