@@ -23,7 +23,7 @@ export class ChannelWebClientServer {
     this.app = app;
     this.baseClientUri = baseClientUri;
     this.registerHandlers(restRelativeBaseUrl);
-    this.shadowComponentsDirectory = shadowPublicDirectory + '/bower_components';
+    this.shadowComponentsDirectory = shadowPublicDirectory;
     this.shadowComponentsPath = shadowPublicPath + '/bower_components';
     this.bowerHelper = new BowerHelper(this.shadowComponentsDirectory);
   }
@@ -89,7 +89,7 @@ export class ChannelWebClientServer {
   }
 
   private async processComponent(pkgInfo: any, request: ChannelsRequest, response: Response): Promise<void> {
-    const path = this.shadowComponentsDirectory + '/' + pkgInfo.pkgMeta.name + '/' + 'channels-component.json';
+    const path = this.shadowComponentsDirectory + '/bower_components/' + pkgInfo.pkgMeta.name + '/' + 'channels-component.json';
     try {
       if (!fs.existsSync(path)) {
         throw new Error("Invalid component:  channels-component.json is missing");

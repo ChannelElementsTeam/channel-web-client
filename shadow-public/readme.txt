@@ -1,1 +1,0 @@
-This is where bower components are loaded dynamically when requested by a client.
