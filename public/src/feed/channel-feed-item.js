@@ -83,32 +83,32 @@ class ChannelFeedItem extends Polymer.Element {
   onHistoryMessage(event) {
     var detail = event.detail;
     if (detail) {
-      this.processMessage(detail);
+      this.processMessage(detail, true);
     }
   }
 
   onMessage(event) {
     var detail = event.detail;
     if (detail) {
-      this.processMessage(detail);
+      this.processMessage(detail, false);
     }
   }
 
-  processMessage(detail) {
+  processMessage(detail, history) {
     const channelMessage = detail.channelMessage;
     if (channelMessage.valid) {
       const msg = channelMessage.json;
       const msgDetails = msg.details;
       switch (msg.type) {
         case 'add-card': {
-          this._replaceCardIfNeeded(detail);
+          this._replaceCardIfNeeded(detail, history);
           break;
         }
         case 'card-to-card':
           if (this.currentCardId && this.currentCardId === msgDetails.cardId) {
             this.$.card.handleCardToCardMessage(detail);
             if (detail.message.history) {
-              this._fireUpdated(detail.message.timestamp);
+              this._fireUpdated(detail.message.timestamp, history);
             }
           } else {
             if (!this._pendingCardMessages[msgDetails.cardId]) {
@@ -123,7 +123,7 @@ class ChannelFeedItem extends Polymer.Element {
     }
   }
 
-  _replaceCardIfNeeded(detail) {
+  _replaceCardIfNeeded(detail, history) {
     let replace = (!this.currentCard) || (detail.message.timestamp >= this.currentCard.message.timestamp);
     if (replace) {
       this.currentCard = detail;
@@ -143,7 +143,7 @@ class ChannelFeedItem extends Polymer.Element {
             delete this._pendingCardMessages[cardId];
           }
           this.set("itemData", itemData);
-          this._fireUpdated(detail.message.timestamp);
+          this._fireUpdated(detail.message.timestamp, history);
         });
       }).catch((err) => {
         console.error("Failed to import component", err);
@@ -151,9 +151,16 @@ class ChannelFeedItem extends Polymer.Element {
     }
   }
 
-  _fireUpdated(timestamp) {
-    const event = new CustomEvent("update", { bubbles: true, composed: true, detail: { timestamp: timestamp } });
+  _fireUpdated(timestamp, history = false) {
+    const event = new CustomEvent("update", { bubbles: true, composed: true, detail: { timestamp: timestamp, history: history } });
     this.dispatchEvent(event);
+  }
+
+  ripple() {
+    this.$.header.style.background = "#C5CAE9";
+    setTimeout(() => {
+      this.$.header.style.background = "";
+    }, 800);
   }
 }
 window.customElements.define(ChannelFeedItem.is, ChannelFeedItem);

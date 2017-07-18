@@ -56,10 +56,13 @@ class FeedPage extends Polymer.Element {
   }
 
   onItemUpdate(event) {
+    const itemAddress = event.model.item.channelAddress;
+    let historyUpdate = false;
     for (let i = 0; i < this.channels.length; i++) {
       const c = this.channels[i];
-      if (c.channelAddress === event.model.item.channelAddress) {
+      if (c.channelAddress === itemAddress) {
         c.lastUpdated = event.detail.timestamp;
+        historyUpdate = event.detail.history;
         break;
       }
     }
@@ -73,6 +76,9 @@ class FeedPage extends Polymer.Element {
         const cardView = this.shadowRoot.querySelector('channel-feed-item[data-address="' + c.channelAddress + '"]');
         if (cardView) {
           cardView.style = this.getItemStyle(c);
+          if ((c.channelAddress === itemAddress) && (!historyUpdate)) {
+            cardView.ripple();
+          }
         }
       }
     }

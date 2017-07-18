@@ -20,6 +20,7 @@
         background: #f8f8f8;
         padding: 10px;
         cursor: pointer;
+        transition: background 1.8s ease;
       }
 
       .content {
@@ -44,7 +45,7 @@
     </style>
     <x-card>
       <section>
-        <div class="header horizontal layout center">
+        <div id="header" class="header horizontal layout center">
           <div class="name flex">{{channel.name}}</div>
           <div class="timestamp">{{channel.timeDisplay}}</div>
         </div>

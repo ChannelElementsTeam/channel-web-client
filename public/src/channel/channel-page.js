@@ -11,6 +11,7 @@ class ChannelPage extends Polymer.Element {
         type: Object,
         observer: 'onChannelJoined'
       },
+      items: Array,
       pinnedData: Object,
       pinnedCard: String
     }
@@ -246,14 +247,14 @@ class ChannelPage extends Polymer.Element {
   onMessage(event) {
     var detail = event.detail;
     if (detail) {
-      this.processMessage(detail, false);
+      this.processMessage(detail);
     }
   }
 
   onHistoryMessage(event) {
     var detail = event.detail;
     if (detail) {
-      this.processMessage(detail, true);
+      this.processMessage(detail);
     }
   }
 
@@ -279,7 +280,7 @@ class ChannelPage extends Polymer.Element {
     }
   }
 
-  processMessage(detail, history) {
+  processMessage(detail) {
     const channelMessage = detail.channelMessage;
     if (channelMessage.valid) {
       const msg = channelMessage.json;
@@ -289,7 +290,7 @@ class ChannelPage extends Polymer.Element {
           $service.componentManager.get(msgDetails.package).then((pkg) => {
             Polymer.importHref(this.resolveUrl(pkg.importHref), () => {
               detail.package = pkg;
-              this.insertMessage(msgDetails.cardId, detail, history);
+              this.insertMessage(msgDetails.cardId, detail);
             });
           }).catch((err) => {
             console.error("Failed to import component", err);
@@ -314,7 +315,7 @@ class ChannelPage extends Polymer.Element {
     }
   }
 
-  insertMessage(cardId, detail, atTop) {
+  insertMessage(cardId, detail) {
     const itemData = {
       cardId: cardId,
       detail: detail,
@@ -325,12 +326,20 @@ class ChannelPage extends Polymer.Element {
       itemData.pendingCardMessages = this._pendingCardMessages[cardId];
       delete this._pendingCardMessages[cardId];
     }
-    if (atTop) {
-      this.unshift('items', itemData);
-    } else {
-      this.push('items', itemData);
+    const timestamp = itemData.detail.message.timestamp;
+    let index = -1;
+    for (var i = 0; i < this.items.length; i++) {
+      const t2 = this.items[i].detail.message.timestamp;
+      if (timestamp < t2) {
+        index = i;
+        break;
+      }
     }
-    // TODO: not efficient because shit renders list again when bound
+    if (index < 0) {
+      this.push('items', itemData);
+    } else {
+      this.splice("items", index, 0, itemData);
+    }
   }
 
   onItemPin(event) {
@@ -353,6 +362,19 @@ class ChannelPage extends Polymer.Element {
     }
     const cardList = pin ? [cardId] : [];
     $service.dbService.savePinnedCards(this.channelInfo.channelAddress, cardList).then(() => { });
+  }
+
+  onItemRender(event) {
+    if (event.model.index === (this.items.length - 1)) {
+      this.scrollToBottom();
+    }
+  }
+
+  scrollToBottom() {
+    setTimeout(() => {
+      this.$.scrollPanel.scrollTop = this.$.scrollPanel.scrollHeight;
+    }, 100);
+    this.$.scrollPanel.scrollTop = this.$.scrollPanel.scrollHeight;
   }
 }
 window.customElements.define(ChannelPage.is, ChannelPage);
