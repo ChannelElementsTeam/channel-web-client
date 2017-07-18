@@ -225,13 +225,21 @@ export class BowerHelper {
 
   private async clean(): Promise<void> {
     console.log("Bower: clearing out any existing contents...");
+    this.packageCache.reset();
+    this.infoCache.reset();
     return new Promise<void>((resolve, reject) => {
-      remove(this.shadowComponentsDirectory + "/", (err: any) => {
+      remove(this.shadowComponentsDirectory + "/bower_components", (err: any) => {
         if (err) {
           reject(err);
         } else {
           console.log("Bower: clear complete");
-          resolve();
+          remove(this.shadowComponentsDirectory + "/bower.json", (err2: any) => {
+            if (err) {
+              reject(err2);
+            } else {
+              resolve();
+            }
+          });
         }
       });
     });
