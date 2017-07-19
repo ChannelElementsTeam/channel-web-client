@@ -7,7 +7,7 @@ import * as fs from 'fs';
 import { db } from "./db";
 import { ComponentRequest, ComponentDescriptor, ComponentResponse } from "./common/client-requests";
 import { UserRecord } from './interfaces/db-records';
-import { BowerHelper } from './bower-helper';
+import { BowerHelper, BowerInstallResult } from './bower-helper';
 
 const MAX_HISTORY_BUFFERED_SIZE = 50000;
 const USER_COOKIE_NAME = 'channel-elements-web-client-id';
@@ -28,7 +28,9 @@ export class ChannelWebClientServer {
     this.bowerHelper = new BowerHelper(this.shadowComponentsDirectory);
   }
 
-  start(): void {
+  async start(): Promise<void> {
+    // const result = await this.bowerHelper.install("uuid");
+    // console.log("Install", result);
     // noop
   }
 
@@ -77,38 +79,43 @@ export class ChannelWebClientServer {
           console.log("Component loaded", pkgInfo);
           resolve();
         }).catch((err) => {
-          console.error("Error processing component", pkgInfo, err);
+          console.error("Error processing component", pkg, err);
           response.status(400).send("Unable to load component: " + err.toString());
           resolve();
         });
       }).catch((err) => {
         console.error(err.mesage || err);
+        response.status(503).send("Failure: " + (err.mesage || err));
         resolve();
       });
     });
   }
 
-  private async processComponent(pkgInfo: any, request: ChannelsRequest, response: Response): Promise<void> {
-    const path = this.shadowComponentsDirectory + '/bower_components/' + pkgInfo.pkgMeta.name + '/' + 'channels-component.json';
+  private async processComponent(pkgInfo: BowerInstallResult, request: ChannelsRequest, response: Response): Promise<void> {
+    if (!pkgInfo || !pkgInfo.pkgMeta) {
+      throw new Error("Package is invalid or incomplete");
+    }
+    if (!pkgInfo.pkgMeta.main) {
+      throw new Error("Invalid package:  'main' is missing");
+    }
+    const componentPath = this.shadowComponentsDirectory + '/bower_components/' + pkgInfo.endpoint.name + '/' + 'channels-component.json';
     try {
-      if (!fs.existsSync(path)) {
+      if (!fs.existsSync(componentPath)) {
         throw new Error("Invalid component:  channels-component.json is missing");
       }
-      const content = fs.readFileSync(path, 'utf-8');
+      const content = fs.readFileSync(componentPath, 'utf-8');
       const descriptor = JSON.parse(content) as ComponentDescriptor;
       if (!descriptor || !descriptor.composerTag || !descriptor.viewerTag) {
         throw new Error("Invalid component descriptor in channel-component.json");
       }
       const componentResponse: ComponentResponse = {
         source: pkgInfo.endpoint.source,
-        packageName: pkgInfo.pkgMeta.name,
-        importHref: this.shadowComponentsPath + '/' + pkgInfo.pkgMeta.name + '/' + pkgInfo.pkgMeta.main,
-        package: pkgInfo.pkgMeta,
+        importHref: this.shadowComponentsPath + '/' + pkgInfo.endpoint.name + '/' + pkgInfo.pkgMeta.main,
+        package: pkgInfo,
         channelComponent: descriptor
       };
       response.json(componentResponse);
     } catch (err) {
-      await this.bowerHelper.uninstallComponent(pkgInfo);
       throw err;
     }
   }

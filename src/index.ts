@@ -46,6 +46,7 @@ class ChannelElementsWebClient {
     this.started = Date.now();
 
     console.log("Channel Elements Web Client Server is running");
+
   }
 
   private setupExceptionHandling(): void {
