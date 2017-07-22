@@ -52,7 +52,6 @@ class ChannelCard extends Polymer.Element {
       this.element = e;
 
       this.set("participant", this.data.participant.details);
-      console.log("Card participant", this.data);
 
       requestAnimationFrame(() => {
         if (this.pending && this.pending.length) {
