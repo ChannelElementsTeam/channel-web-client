@@ -51,16 +51,8 @@ class ChannelCard extends Polymer.Element {
       this.$.cardContainer.appendChild(e);
       this.element = e;
 
-      const identity = this.data.participant.identity || this.data.participant.participantIdentity.signedIdentity;
-      let _participant = this.data._participant || identity.details;
-      if (!_participant) {
-        _participant = ChannelIdentityUtils.decode(identity.signature, identity.publicKey);
-      }
-      this.set("participant", _participant);
+      this.set("participant", this.data.participant.details);
 
-      if (!_participant) {
-        console.log("*** Warning: No participant in card data: ", this.data);
-      }
       requestAnimationFrame(() => {
         if (this.pending && this.pending.length) {
           this.pending.sort((a, b) => {

@@ -15,7 +15,7 @@ class ComponentManager {
         return;
       }
       this.service.dbService.open().then(() => {
-        this.service.dbService.getComponent(null, packageName).then((response) => {
+        this.service.dbService.getComponent(packageName).then((response) => {
           if (response) {
             resolve(response);
           } else {

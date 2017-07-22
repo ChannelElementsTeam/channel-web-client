@@ -25,11 +25,11 @@ class IdentityManager {
 
   get signedAddress() {
     const keyInfo = this._me();
-    return ChannelIdentityUtils.createSignedAddressIdentity(keyInfo, keyInfo.address);
+    return ChannelIdentityUtils.createSignedAddressIdentity(keyInfo);
   }
 
-  getSignedIdentity(name, image) {
+  get signedKey() {
     const keyInfo = this._me();
-    return ChannelIdentityUtils.createSignedFullIdentity(keyInfo, name, image);
+    return ChannelIdentityUtils.createSignedKeyIdentity(keyInfo);
   }
 }

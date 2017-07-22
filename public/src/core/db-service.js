@@ -1,7 +1,7 @@
 class DbService {
   constructor() {
-    this.DB_NAME = "channels-client-db";
-    this.DB_VERSION = 2;
+    this.DB_NAME = "channels-web-client";
+    this.DB_VERSION = 1;
     this.STORE_COMPONENTS = "components";
     this.STORE_PINNED = "pinnedcards";
     this.MODE_READWRITE = "readwrite";
@@ -30,8 +30,7 @@ class DbService {
           console.log("Failed to load database: ", event);
         };
         if (!db.objectStoreNames.contains(this.STORE_COMPONENTS)) {
-          const store = db.createObjectStore(this.STORE_COMPONENTS, { keyPath: "packageName" });
-          store.createIndex("source", "source", { unique: true });
+          const store = db.createObjectStore(this.STORE_COMPONENTS, { keyPath: "source" });
         }
         if (!db.objectStoreNames.contains(this.STORE_PINNED)) {
           const store = db.createObjectStore(this.STORE_PINNED, { keyPath: "channel" });
@@ -65,16 +64,11 @@ class DbService {
     });
   }
 
-  getComponent(packageName, source) {
+  getComponent(source) {
     return this.open().then(() => {
       return new Promise((resolve, reject) => {
         const store = this.getStore(this.STORE_COMPONENTS, this.MODE_READ);
-        let request;
-        if (packageName) {
-          request = store.get(packageName);
-        } else {
-          request = store.index("source").get(source);
-        }
+        const request = store.get(source);
         request.onerror = (event) => {
           console.error("Failed to load component from DB: ", event);
           reject(new Error("Failed to load component: " + event));

@@ -44,7 +44,7 @@ class CreateChannelDialog extends Polymer.Element {
       if (image) {
         $service.dbService.setLocal(this.LOCAL_AVATAR, image);
       }
-      const identity = $service.identityManager.getSignedIdentity(name, image);
+
       const contract = {
         package: "https://github.com/ChannelsTeam/contract-standard",
         serviceContract: {
@@ -63,14 +63,21 @@ class CreateChannelDialog extends Polymer.Element {
       const details = {
         name: channel,
         channelContract: contract,
-        memberContract: memberContract
+        memberContract: memberContract,
+        memberIdentity: {
+          name: name,
+          imageUrl: image
+        }
       };
-      $channels.createChannel(provider, identity, details).then((channelInfo) => {
-        const event = new CustomEvent('refresh-channels', { bubbles: true, composed: true, detail: {} });
-        window.dispatchEvent(event);
-        $channels.getProviderInfo(provider).then((providerInfo) => {
-          console.log("Channel created", providerInfo, channelInfo);
-          $router.goto(['channel', providerInfo.id, channelInfo.channelAddress]);
+
+      $channels.registerWithSwitch(provider, $service.identityManager.signedKey, {}).then(() => {
+        $channels.createChannel(provider, $service.identityManager.signedAddress, details).then((channelInfo) => {
+          const event = new CustomEvent('refresh-channels', { bubbles: true, composed: true, detail: {} });
+          window.dispatchEvent(event);
+          $channels.getSwitchInfo(provider).then((switchInfo) => {
+            console.log("Channel created", switchInfo, channelInfo);
+            $router.goto(['channel', switchInfo.id, channelInfo.channelAddress]);
+          });
         });
       }).catch((err) => {
         console.error("Failed to create channel: ", err);
