@@ -105,8 +105,8 @@
     <div id="container" class="horizontal layout wrap">
       <template is="dom-repeat" items="{{items}}">
         <div class="item" on-click="onItemClick">
-          <div class="name">{{item.package.name}}</div>
-          <div class="description">{{item.package.description}}</div>
+          <div class="name">{{item.package.pkgMeta.name}}</div>
+          <div class="description">{{item.package.pkgMeta.description}}</div>
         </div>
       </template>
       <div class="item horizontal layout center btn" on-click="onImport">

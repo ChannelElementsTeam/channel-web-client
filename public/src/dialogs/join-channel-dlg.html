@@ -95,15 +95,20 @@
           if (image) {
             $service.dbService.setLocal(this.LOCAL_AVATAR, image);
           }
-          const identity = $service.identityManager.getSignedIdentity(name, image);
-          $channels.acceptInvitation(code, identity).then((acceptResponse) => {
-            this.hide();
-            const event = new CustomEvent('refresh-channels', { bubbles: true, composed: true, detail: {} });
-            window.dispatchEvent(event);
-            console.log("Accept response", acceptResponse);
-            setTimeout(() => {
-              $router.goto(['channel', acceptResponse.provider.id, acceptResponse.channel.channelAddress]);
-            }, 100);
+
+          $channels.getInviteInfo(code).then((inviteInfo) => {
+            const providerUrl = inviteInfo.serviceEndpoints.descriptionUrl;
+            $channels.registerWithSwitch(providerUrl, $service.identityManager.signedKey, {}).then(() => {
+              $channels.acceptInvitation(inviteInfo, $service.identityManager.signedAddress, { name: name, imageUrl: image }).then((acceptResponse) => {
+                this.hide();
+                const event = new CustomEvent('refresh-channels', { bubbles: true, composed: true, detail: {} });
+                window.dispatchEvent(event);
+                console.log("Accept response", acceptResponse);
+                setTimeout(() => {
+                  $router.goto(['channel', acceptResponse.provider.id, acceptResponse.channel.channelAddress]);
+                }, 100);
+              });
+            });
           }).catch((err) => {
             console.error("Failed to accept channel invitation: ", err);
             this.hide();
