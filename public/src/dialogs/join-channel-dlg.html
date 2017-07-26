@@ -1,5 +1,6 @@
 <link rel="import" href="../common/x-dialog.html">
 <link rel="import" href="../common/x-button.html">
+<link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
 <dom-module id="join-channel-dlg">
   <template>
     <style is="custom-style" include="iron-flex iron-flex-alignment">
@@ -38,6 +39,17 @@
         font-weight: 300;
         margin-top: 10px;
       }
+
+      #chkSubscribe {
+        display: block;
+        margin-top: 25px;
+        font-family: inherit;
+        display: block;
+        font-weight: 400;
+        --primary-text-color: #808080;
+        letter-spacing: 0.05em;
+        font-size: 18px;
+      }
     </style>
     <x-dialog id="dlg" headline="Join Channel">
       <div class="content">
@@ -47,6 +59,11 @@
         <input type="text" id="txtName" placeholder="Your name" on-input="onInput">
         <label style="margin-top: 25px;">Your avatar (as seen in this channel)</label>
         <input type="text" id="txtImage" placeholder="url to your image">
+        <paper-checkbox id="chkSubscribe" on-change="onSubscribeChange">Subscribe to the channel</paper-checkbox>
+        <div id="mobilePanel" style="display: none;">
+          <label style="margin-top: 25px;">Mobile number</label>
+          <input type="tel" id="txtMobile" placeholder="">
+        </div>
         <div class="buttons horizontal layout center">
           <div class="flex"></div>
           <div>
@@ -66,11 +83,14 @@
         super();
         this.LOCAL_NAME = "last-name-used";
         this.LOCAL_AVATAR = "last-avatar-used";
+        this.LOCAL_NUMBER = "identity-number";
       }
       show(code) {
         this.$.txtCode.value = code || "";
         this.$.txtName.value = $service.dbService.getLocal(this.LOCAL_NAME) || "";
         this.$.txtImage.value = $service.dbService.getLocal(this.LOCAL_AVATAR) || "";
+        this.$.chkSubscribe.checked = false;
+        this.$.txtMobile.value = $service.dbService.getLocal(this.LOCAL_NUMBER) || "";
         this.onInput();
         this.$.dlg.show();
       }
@@ -85,21 +105,34 @@
         const name = this.$.txtName.value.trim();
         this.$.btnJoin.disabled = !(code && name);
       }
+      onSubscribeChange() {
+        this.$.mobilePanel.style.display = this.$.chkSubscribe.checked ? "" : "none";
+      }
       onJoin() {
         this.hide();
         const code = this.$.txtCode.value.trim();
         const name = this.$.txtName.value.trim();
         const image = this.$.txtImage.value.trim();
+        const mobile = this.$.txtMobile.value.trim();
         if (code && name) {
           $service.dbService.setLocal(this.LOCAL_NAME, name);
           if (image) {
             $service.dbService.setLocal(this.LOCAL_AVATAR, image);
           }
+          if (mobile) {
+            $service.dbService.setLocal(this.LOCAL_NUMBER, mobile);
+          }
+          const regDetails = {};
+          if (mobile) {
+            regDetails.notifications = {
+              smsNumber: mobile
+            }
+          }
 
           $channels.getInviteInfo(code).then((inviteInfo) => {
             const providerUrl = inviteInfo.serviceEndpoints.descriptionUrl;
-            $channels.registerWithSwitch(providerUrl, $service.identityManager.signedKey, {}).then(() => {
-              $channels.acceptInvitation(inviteInfo, $service.identityManager.signedAddress, { name: name, imageUrl: image }).then((acceptResponse) => {
+            $channels.registerWithSwitch(providerUrl, $service.identityManager.signedKey, regDetails, true).then(() => {
+              $channels.acceptInvitation(inviteInfo, $service.identityManager.signedAddress, { name: name, imageUrl: image }, { subscribe: this.$.chkSubscribe.checked }).then((acceptResponse) => {
                 this.hide();
                 const event = new CustomEvent('refresh-channels', { bubbles: true, composed: true, detail: {} });
                 window.dispatchEvent(event);

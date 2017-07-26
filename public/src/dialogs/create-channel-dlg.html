@@ -1,5 +1,7 @@
 <link rel="import" href="../common/x-dialog.html">
 <link rel="import" href="../common/x-button.html">
+<link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
+
 <dom-module id="create-channel-dlg">
   <template>
     <style is="custom-style" include="iron-flex iron-flex-alignment">
@@ -38,6 +40,17 @@
         font-weight: 300;
         margin-top: 10px;
       }
+
+      #chkSubscribe {
+        display: block;
+        margin-top: 25px;
+        font-family: inherit;
+        display: block;
+        font-weight: 400;
+        --primary-text-color: #808080;
+        letter-spacing: 0.05em;
+        font-size: 18px;
+      }
     </style>
     <x-dialog id="dlg" headline="New Channel">
       <div class="content">
@@ -49,6 +62,11 @@
         <input type="text" id="txtName" placeholder="Your name" on-input="onInput">
         <label style="margin-top: 25px;">Your avatar (as seen in this channel)</label>
         <input type="text" id="txtImage" placeholder="url to your image">
+        <paper-checkbox id="chkSubscribe" on-change="onSubscribeChange">Subscribe to the channel</paper-checkbox>
+        <div id="mobilePanel" style="display: none;">
+          <label style="margin-top: 25px;">Mobile number</label>
+          <input type="tel" id="txtMobile" placeholder="">
+        </div>
         <div class="buttons horizontal layout center">
           <div class="flex"></div>
           <div>

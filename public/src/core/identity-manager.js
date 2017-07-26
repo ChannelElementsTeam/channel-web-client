@@ -2,6 +2,7 @@ class IdentityManager {
   constructor(service) {
     this.service = service;
     this.KEY_ME = "identity-me";
+    this.KEY_NUMBER = "identity-me-number";
     this.keyInfo = null;
     this.privateKey = null;
   }
