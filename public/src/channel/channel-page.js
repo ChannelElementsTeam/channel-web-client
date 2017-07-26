@@ -254,6 +254,7 @@ class ChannelPage extends Polymer.Element {
   onHistoryMessage(event) {
     var detail = event.detail;
     if (detail) {
+      // console.log("------> History <---", detail.channelMessage.json.type, detail.message.timestamp);
       this.processMessage(detail);
     }
   }

@@ -56,7 +56,7 @@ class ChannelCard extends Polymer.Element {
       requestAnimationFrame(() => {
         if (this.pending && this.pending.length) {
           this.pending.sort((a, b) => {
-            return a.message.timestamp = b.message.timestamp;
+            return a.message.timestamp - b.message.timestamp;
           });
           for (var i = 0; i < this.pending.length; i++) {
             this.handleCardToCardMessage(this.pending[i]);
